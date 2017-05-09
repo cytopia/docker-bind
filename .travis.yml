@@ -53,7 +53,7 @@ script:
       --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME} &
   - sleep 5
   - docker ps
-  - docker exec ${MY_DOCKER_NAME} named -V | grep -oiE '^BIND[[:space:]]+[0-9.]+'
+  - docker exec ${MY_DOCKER_NAME} named -V
   - docker exec ${MY_DOCKER_NAME} named -V | grep -oiE '^BIND[[:space:]]+[0-9.]+'
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
@@ -64,7 +64,7 @@ script:
       --name ${MY_DOCKER_NAME} cytopia/${MY_DOCKER_NAME} &
   - sleep 5
   - docker ps
-  - docker exec ${MY_DOCKER_NAME} named -V | grep -oiE '^BIND[[:space:]]+[0-9.]+'
+  - docker exec ${MY_DOCKER_NAME} named -V
   - docker exec ${MY_DOCKER_NAME} named -V | grep -oiE '^BIND[[:space:]]+[0-9.]+'
   - docker stop "$( docker ps | grep  "${MY_DOCKER_NAME}" | awk '{print $1}' )"
   - docker rm "${MY_DOCKER_NAME}"
