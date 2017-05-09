@@ -51,7 +51,7 @@
 ```bash
 $ docker run -i \
     -p 127.0.0.1:53:53 \
-	-p 127.0.0.1:53/udp:53/udp \
+    -p 127.0.0.1:53/udp:53/udp \
     -t cytopia/bind
 ```
 
@@ -62,9 +62,9 @@ $ docker run -i \
 ```bash
 $ docker run -i \
     -p 127.0.0.1:53:53 \
-	-p 127.0.0.1:53/udp:53/udp \
-	-e WILDCARD_DOMAIN=example.com \
-	-e WILDCARD_ADDRESS=192.168.0.1 \
+    -p 127.0.0.1:53/udp:53/udp \
+    -e WILDCARD_DOMAIN=example.com \
+    -e WILDCARD_ADDRESS=192.168.0.1 \
     -t cytopia/bind
 ```
 
@@ -75,9 +75,9 @@ $ docker run -i \
 ```bash
 $ docker run -i \
     -p 127.0.0.1:53:53 \
-	-p 127.0.0.1:53/udp:53/udp \
-	-e WILDCARD_DOMAIN=loc \
-	-e WILDCARD_ADDRESS=192.168.0.1 \
+    -p 127.0.0.1:53/udp:53/udp \
+    -e WILDCARD_DOMAIN=loc \
+    -e WILDCARD_ADDRESS=192.168.0.1 \
     -t cytopia/bind
 ```
 
