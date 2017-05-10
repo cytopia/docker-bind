@@ -123,8 +123,15 @@ if set | grep '^WILDCARD_DOMAIN=' >/dev/null 2>&1 && set | grep '^WILDCARD_ADDRE
 	conf_file="/etc/bind/custom-named.conf.${WILDCARD_DOMAIN}"
 	zone_file="/etc/bind/custom-db.${WILDCARD_DOMAIN}"
 
-	# Add our config
-	echo "include \"${conf_file}\";" >> /etc/bind/named.conf
+	# Re-create default config
+	(
+		echo "include \"/etc/bind/named.conf.options\";"
+		echo "include \"/etc/bind/named.conf.local\";"
+		echo "include \"/etc/bind/named.conf.default-zones\";"
+	) > /etc/bind/named.conf
+
+	# Add custom config
+	run "echo 'include \"${conf_file}\";' >> /etc/bind/named.conf"
 
 	# Config
 	(
@@ -156,21 +163,15 @@ else
 	if ! set | grep '^WILDCARD_ADDRESS=' >/dev/null 2>&1; then
 		log "info" "\$WILDCARD_ADDRESS not set, not adding custom DNS record."
 	fi
+
+	# Re-create default config
+	(
+		echo "include \"/etc/bind/named.conf.options\";"
+		echo "include \"/etc/bind/named.conf.local\";"
+		echo "include \"/etc/bind/named.conf.default-zones\";"
+	) > /etc/bind/named.conf
+
 fi
-
-
-###
-### Configure
-###
-#run "sed -i'' 's/^[[:space:]]*listen-on-v6.*//g' /etc/bind/named.conf.options"
-#run "sed -i'' 's/^};/\tforwarders {\n\t\t8.8.4.4;\n\t};\n};/' /etc/bind/named.conf.options"
-
-
-###
-### Fix permissions
-###
-run "mkdir -p /var/run/named"
-run "chown -R bind:bind /var/run/named"
 
 
 
@@ -178,4 +179,4 @@ run "chown -R bind:bind /var/run/named"
 ### Start
 ###
 log "info" "Starting $( named -V | grep -oiE '^BIND[[:space:]]+[0-9.]+' )"
-exec /usr/sbin/named -4 -u bind -g
+exec /usr/sbin/named -4 -c /etc/bind/named.conf -u bind -f
