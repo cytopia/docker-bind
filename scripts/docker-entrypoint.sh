@@ -174,6 +174,55 @@ else
 fi
 
 
+###
+### Add custom forwarder IP's
+###
+if ! set | grep '^DNS_FORWARDER=' >/dev/null 2>&1; then
+	log "warn" "\$DNS_FORWARDER not set."
+	log "warn" "No custom DNS server will be used as forwarder"
+else
+
+	# To be pupulated
+	_forwarders_block=""
+
+	# Transform into newline separated forwards:
+	#   x.x.x.x\n
+	#   y.y.y.y\n
+	_forwards="$( echo "${DNS_FORWARDER}" | sed 's/[[:space:]]*//g' | sed 's/,/\n/g' )"
+
+	# loop over them
+	IFS='
+	'
+	for ip in ${_forwards}; do
+		if ! isip "${ip}"; then
+			log "err" "DNS_FORWARDER error: not a valid IP address: ${ip}"
+			exit 1
+		fi
+
+		if [ "${_forwarders_block}" = "" ]; then
+			_forwarders_block="\t\t${ip};"
+		else
+			_forwarders_block="${_forwarders_block}\n\t\t${ip};"
+		fi
+	done
+
+	if [ "${_forwarders_block}" = "" ]; then
+		log "err" "DNS_FORWARDER error: variable specified, but no IP addresses found."
+		exit 1
+	fi
+
+	log "info" "Adding custom DNS forwarder: ${DNS_FORWARDER}"
+
+	# forwarders {
+	#     x.x.x.x;
+	#     y.y.y.y;
+	# };
+	_forwarders_block="\tforwarders {\n${_forwarders_block}\n\t};"
+
+	run "sed -i'' 's/^};$/${_forwarders_block}\n};/' /etc/bind/named.conf.options"
+fi
+
+
 
 ###
 ### Start

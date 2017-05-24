@@ -1,6 +1,6 @@
 # Bind Docker
 
-<small>**Latest build:** 2017-05-10</small>
+<small>**Latest build:** 2017-05-24</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-bind.svg?branch=master)](https://travis-ci.org/cytopia/docker-bind) [![](https://images.microbadger.com/badges/version/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind") [![](https://images.microbadger.com/badges/image/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind") [![](https://images.microbadger.com/badges/license/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind")
 
@@ -32,6 +32,7 @@
 | DEBUG_COMPOSE_ENTRYPOINT | bool | `0` | Show shell commands executed during start.<br/>Value: `0` or `1` |
 | WILDCARD_DOMAIN | string | `` | Specify a wild-card domain to add during startup.<br/>Example: `WILDCARD_DOMAIN=example.com` or `WILDCARD_DOMAIN=local` or `WILDCARD_DOMAIN=loc`<br/>**Note:** `$WILDCARD_ADDRESS` must also be specified. |
 | WILDCARD_ADDRESS | string | `` | Specify to which IP address the wild-card domain should point to.<br/>Example: `WILDCARD_ADDRESS=192.168.0.1`<br/>**Note:** $WILDCARD_DOMAIN` must also be specidied. |
+| DNS_FORWARDER | string| `` | Specify a comma separated list of IP addresses as custom DNS resolver. This is useful if your LAN already has a DNS server which adds custom/internal domains and you still want to keep them in this DNS server<br/>Example: `DNS_FORWARDER=8.8.8.8,8.8.4.4` |
 
 ### Default mount points
 
