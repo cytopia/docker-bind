@@ -82,6 +82,21 @@ $ docker run -i \
     -t cytopia/bind
 ```
 
+**4. Add wildcard Domain (TLD) and use your corporate DNS server as resolver**
+
+* `loc` and all its subdomains (such as: `hostname.loc`) will point to `192.168.0.1`:
+* Your corporate DNS servers are `10.0.15.1` and `10.0.15.2`
+
+```bash
+$ docker run -i \
+    -p 127.0.0.1:53:53 \
+    -p 127.0.0.1:53/udp:53/udp \
+    -e WILDCARD_DOMAIN=loc \
+    -e WILDCARD_ADDRESS=192.168.0.1 \
+	-e DNS_FORWARDER=10.0.15.1,10.0.15,2 \
+    -t cytopia/bind
+```
+
 ## Version
 
 BIND 9.9.5
