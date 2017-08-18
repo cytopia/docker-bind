@@ -1,7 +1,7 @@
 ###
 ### BIND
 ###
-FROM debian:jessie
+FROM debian:stable
 MAINTAINER "cytopia" <cytopia@everythingcli.org>
 
 
@@ -13,7 +13,7 @@ LABEL \
 	image="bind" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-05-24"
+	build-date="2017-08-16"
 
 
 ###

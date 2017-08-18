@@ -1,6 +1,6 @@
 # Bind Docker
 
-<small>**Latest build:** 2017-05-24</small>
+<small>**Latest build:** 2017-08-16</small>
 
 [![Build Status](https://travis-ci.org/cytopia/docker-bind.svg?branch=master)](https://travis-ci.org/cytopia/docker-bind) [![](https://images.microbadger.com/badges/version/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind") [![](https://images.microbadger.com/badges/image/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind") [![](https://images.microbadger.com/badges/license/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind")
 
@@ -99,4 +99,4 @@ $ docker run -i \
 
 ## Version
 
-BIND 9.9.5
+BIND 9.10.3
