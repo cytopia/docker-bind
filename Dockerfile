@@ -13,7 +13,7 @@ LABEL \
 	image="bind" \
 	vendor="cytopia" \
 	license="MIT" \
-	build-date="2017-08-16"
+	build-date="2018-01-11"
 
 
 ###
