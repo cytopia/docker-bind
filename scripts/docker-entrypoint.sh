@@ -180,6 +180,16 @@ fi
 if ! set | grep '^DNS_FORWARDER=' >/dev/null 2>&1; then
 	log "warn" "\$DNS_FORWARDER not set."
 	log "warn" "No custom DNS server will be used as forwarder"
+
+	# Restore defaults
+	(
+		echo "options {"
+		echo "    directory \"/var/cache/bind\";"
+		echo "    dnssec-validation auto;"
+		echo "    auth-nxdomain no;    # conform to RFC1035"
+		echo "    listen-on-v6 { any; };"
+		echo "};"
+	) > /etc/bind/named.conf.options
 else
 
 	# To be pupulated
@@ -217,9 +227,17 @@ else
 	#     x.x.x.x;
 	#     y.y.y.y;
 	# };
-	_forwarders_block="\tforwarders {\n${_forwarders_block}\n\t};"
-
-	run "sed -i'' 's/^};$/${_forwarders_block}\n};/' /etc/bind/named.conf.options"
+	(
+		echo "options {"
+		echo "    directory \"/var/cache/bind\";"
+		echo "    dnssec-validation auto;"
+		echo "    auth-nxdomain no;    # conform to RFC1035"
+		echo "    listen-on-v6 { any; };"
+		echo "    forwarders {"
+		echo "${_forwarders_block}"
+		echo "    };"
+		echo "};"
+	) > /etc/bind/named.conf.options
 fi
 
 
