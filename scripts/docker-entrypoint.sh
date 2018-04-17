@@ -153,7 +153,9 @@ if set | grep '^WILDCARD_DOMAIN=' >/dev/null 2>&1 && set | grep '^WILDCARD_ADDRE
 		echo "   IN NS     ."
 		if [ -n "$CUSTOM_DNS" ]
 		then
-			echo "$CUSTOM_DNS" | sed "s/=/ IN A  /g; s/,/\n/g;"
+			CUSTOM_DNS_LINES=$(echo "$CUSTOM_DNS" | sed "s/=/ IN A  /g; s/,/\n/g;")
+			echo $CUSTOM_DNS_LINES
+			log "info" "Adding custom DNS: ${CUSTOM_DNS_LINES}"
 		fi
 		echo "   IN A      ${WILDCARD_ADDRESS}"
 		echo "*  IN A      ${WILDCARD_ADDRESS}"
