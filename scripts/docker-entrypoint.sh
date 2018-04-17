@@ -151,6 +151,10 @@ if set | grep '^WILDCARD_DOMAIN=' >/dev/null 2>&1 && set | grep '^WILDCARD_ADDRE
 		echo "             2419200   ; expiry time"
 		echo "             604800)   ; maximum caching time in case of failed lookups"
 		echo "   IN NS     ."
+		if [ -n "$CUSTOM_DNS" ]
+		then
+			echo "$CUSTOM_DNS" | sed "s/=/ IN A  /g; s/,/\n/g;"
+		fi
 		echo "   IN A      ${WILDCARD_ADDRESS}"
 		echo "*  IN A      ${WILDCARD_ADDRESS}"
 	) > "${zone_file}"
