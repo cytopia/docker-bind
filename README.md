@@ -33,6 +33,7 @@
 | WILDCARD_DOMAIN | string | `` | Specify a wild-card domain to add during startup.<br/>Example: `WILDCARD_DOMAIN=example.com` or `WILDCARD_DOMAIN=local` or `WILDCARD_DOMAIN=loc`<br/>**Note:** `$WILDCARD_ADDRESS` must also be specified. |
 | WILDCARD_ADDRESS | string | `` | Specify to which IP address the wild-card domain should point to.<br/>Example: `WILDCARD_ADDRESS=192.168.0.1`<br/>**Note:** $WILDCARD_DOMAIN` must also be specidied. |
 | DNS_FORWARDER | string| `` | Specify a comma separated list of IP addresses as custom DNS resolver. This is useful if your LAN already has a DNS server which adds custom/internal domains and you still want to keep them in this DNS server<br/>Example: `DNS_FORWARDER=8.8.8.8,8.8.4.4` |
+| CUSTOM_DNS | string | `` | Add additional DNS records (above the wildcard record). This can be used to make certain subdomains point to a different ip address, or even to create additional wildcard records within the zone.<br/>**Note:** `$WILDCARD_DOMAIN` must also be specified.<br/>Example: `CUSTOM_DNS=special=127.0.0.1` would yield special.@WILDCARD_DOMAIN -> 127.0.0.1
 
 ### Default mount points
 
@@ -93,6 +94,24 @@ $ docker run -i \
     -p 127.0.0.1:53/udp:53/udp \
     -e WILDCARD_DOMAIN=loc \
     -e WILDCARD_ADDRESS=192.168.0.1 \
+	-e DNS_FORWARDER=10.0.15.1,10.0.15,2 \
+    -t cytopia/bind
+```
+
+
+**5. Add wildcard Domain (TLD), use your corporate DNS server as resolver but make one DNS entry point to a different ip**
+
+* `loc` and all its subdomains (such as: `hostname.loc`) will point to `192.168.0.1`:
+* `special.loc` will point to `192.168.0.10`
+* Your corporate DNS servers are `10.0.15.1` and `10.0.15.2`
+
+```bash
+$ docker run -i \
+    -p 127.0.0.1:53:53 \
+    -p 127.0.0.1:53/udp:53/udp \
+    -e WILDCARD_DOMAIN=loc \
+    -e WILDCARD_ADDRESS=192.168.0.1 \
+    -e CUSTOM_DNS="special=192.168.0.10" \
 	-e DNS_FORWARDER=10.0.15.1,10.0.15,2 \
     -t cytopia/bind
 ```
