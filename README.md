@@ -44,8 +44,9 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
     5. [Wildcard TLD and reverse DNS entry](#wildcard-tld-and-reverse-dns-entry)
     6. [Wildcard TLD and DNS resolver](#wildcard-tld-and-dns-resolver)
     7. [Wildcard TLD, DNS resolver and extra hosts](#wildcard-tld-dns-resolver-and-extra-hosts)
-5. [Support](#support)
-6. [License](#license)
+5. [Host integration](#host-integration)
+6. [Support](#support)
+7. [License](#license)
 
 ---
 
@@ -336,6 +337,31 @@ $ docker run -i \
     -e DNS_FORWARDER=10.0.15.1,10.0.15.2 \
     -t cytopia/bind
 ```
+
+
+## Host integration
+
+You can run this DNS container locally without having to worry to affect any corporate DNS server
+that are given to you via DHCP.
+
+Add the following line to the very beginning to `/etc/dhcp/dhclient.conf`:
+```bash
+prepend domain-name-servers 127.0.0.1;
+```
+Restart network manager
+```bash
+# Via service command
+$ sudo service network-manager restart
+
+# Or the systemd way
+$ sudo systemctl restart network-manager
+```
+
+This will make sure that whenever your `/etc/resolv.conf` is deployed, you will have `127.0.0.1`
+as the first entry and also make use of any other DNS server which are deployed via the LAN's DHCP server.
+
+If `cytopia/bind` is not running, it does not affect the name resolution, because you will still
+have entries in `/etc/resolv.conf`.
 
 
 ## Support
