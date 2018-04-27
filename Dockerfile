@@ -1,33 +1,26 @@
-###
-### BIND
-###
-FROM debian:stable
+FROM debian:buster-slim
 MAINTAINER "cytopia" <cytopia@everythingcli.org>
-
-
-###
-### Labels
-###
-LABEL \
-	name="cytopia's Bind Image" \
-	image="bind" \
-	vendor="cytopia" \
-	license="MIT" \
-	build-date="2018-01-11"
 
 
 ###
 ### Install
 ###
-RUN apt-get update && apt-get -y install \
-    bind9 \
-  && rm -r /var/lib/apt/lists/*
+RUN set -x \
+	&& apt-get update \
+	&& apt-get install --no-install-recommends --no-install-suggests -y \
+		bind9 \
+		dnsutils \
+	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps \
+	&& rm -r /var/lib/apt/lists/* \
+	&& mkdir /var/log/named \
+	&& chown bind:bind /var/log/named \
+	&& chmod 0755 /var/log/named
 
 
 ###
 ### Bootstrap Scipts
 ###
-COPY ./scripts/docker-entrypoint.sh /
+COPY ./data/docker-entrypoint.sh /
 
 
 ###
