@@ -92,10 +92,10 @@ run() {
 
 
 ###
-### Check if a value is an integer
+### Check if a value is an integer (positive or negative)
 ###
 is_int() {
-	printf "%d" "${1}" >/dev/null 2>&1 && return 0 || return 1;
+	echo "${1}" | grep -Eq '^[-+]?[0-9]+$'
 }
 
 
@@ -389,7 +389,7 @@ fi
 ###
 ### DNS Time settings
 ###
-if printenv TTL_TIME >/dev/null 2>&1; then
+if printenv TTL_TIME >/dev/null 2>&1 && [ -n "$( printenv TTL_TIME )" ]; then
 	TTL_TIME="$( printenv TTL_TIME )"
 	if is_int "${TTL_TIME}" && [ "${TTL_TIME}" -gt "0" ]; then
 		log "info" "Changing DNS TTL time to: ${TTL_TIME} sec" "${DEBUG_ENTRYPOINT}"
@@ -402,7 +402,7 @@ else
 	TTL_TIME="${DEFAULT_TTL_TIME}"
 fi
 
-if printenv REFRESH_TIME >/dev/null 2>&1; then
+if printenv REFRESH_TIME >/dev/null 2>&1 && [ -n "$( printenv REFRESH_TIME )" ]; then
 	REFRESH_TIME="$( printenv REFRESH_TIME )"
 	if is_int "${REFRESH_TIME}" && [ "${REFRESH_TIME}" -gt "0" ]; then
 		log "info" "Changing DNS Refresh time to: ${REFRESH_TIME} sec" "${DEBUG_ENTRYPOINT}"
@@ -415,7 +415,7 @@ else
 	REFRESH_TIME="${DEFAULT_REFRESH_TIME}"
 fi
 
-if printenv RETRY_TIME >/dev/null 2>&1; then
+if printenv RETRY_TIME >/dev/null 2>&1 && [ -n "$( printenv RETRY_TIME )" ]; then
 	RETRY_TIME="$( printenv RETRY_TIME )"
 	if is_int "${RETRY_TIME}" && [ "${RETRY_TIME}" -gt "0" ]; then
 		log "info" "Changing DNS Retry time to: ${RETRY_TIME} sec" "${DEBUG_ENTRYPOINT}"
@@ -428,7 +428,7 @@ else
 	RETRY_TIME="${DEFAULT_RETRY_TIME}"
 fi
 
-if printenv EXPIRY_TIME >/dev/null 2>&1; then
+if printenv EXPIRY_TIME >/dev/null 2>&1 && [ -n "$( printenv EXPIRY_TIME )" ]; then
 	EXPIRY_TIME="$( printenv EXPIRY_TIME )"
 	if is_int "${EXPIRY_TIME}" && [ "${EXPIRY_TIME}" -gt "0" ]; then
 		log "info" "Changing DNS Expiry time to: ${EXPIRY_TIME} sec" "${DEBUG_ENTRYPOINT}"
@@ -441,7 +441,7 @@ else
 	EXPIRY_TIME="${DEFAULT_EXPIRY_TIME}"
 fi
 
-if printenv MAX_CACHE_TIME >/dev/null 2>&1; then
+if printenv MAX_CACHE_TIME >/dev/null 2>&1 && [ -n "$( printenv MAX_CACHE_TIME )" ]; then
 	MAX_CACHE_TIME="$( printenv MAX_CACHE_TIME )"
 	if is_int "${MAX_CACHE_TIME}" && [ "${MAX_CACHE_TIME}" -gt "0" ]; then
 		log "info" "Changing DNS Max Cache time to: ${MAX_CACHE_TIME} sec" "${DEBUG_ENTRYPOINT}"
