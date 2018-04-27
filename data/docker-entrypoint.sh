@@ -505,7 +505,7 @@ fi
 ###
 ### Add extra hosts
 ###
-if printenv EXTRA_HOSTS >/dev/null 2>&1; then
+if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; then
 
 	# Convert 'com=1.2.3.4[=com],de=2.3.4.5' into newline separated string:
 	#  com=1.2.3.4
@@ -544,6 +544,8 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1; then
 			"${TTL_TIME}" "${REFRESH_TIME}" "${RETRY_TIME}" "${EXPIRY_TIME}" "${MAX_CACHE_TIME}" \
 			"${DEBUG_ENTRYPOINT}"
 	done
+else
+	log "info" "Not adding any extra hosts" "${DEBUG_ENTRYPOINT}"
 fi
 
 
