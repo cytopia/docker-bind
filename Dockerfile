@@ -10,6 +10,7 @@ RUN set -x \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 		bind9 \
 		dnsutils \
+		iputils-ping \
 	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps \
 	&& rm -r /var/lib/apt/lists/* \
 	&& mkdir /var/log/named \
