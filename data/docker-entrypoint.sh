@@ -476,15 +476,20 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 		my_rev="$( echo "${line}" | awk -F '=' '{print $3}' | xargs )"  # Reverse DNS record
 		my_cfg="${NAMED_DIR}/devilbox-wildcard_dns.${my_dom}.conf"
 
-		# If a CNAME was provided, try to resolve it to an IP address, otherwise skip it
+		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
 		if is_cname "${my_add}"; then
-			tmp="${my_add}"
-			my_add="$( dig @8.8.8.8 +short "${my_add}" A )"
-			if ! is_ip4 "${my_add}"; then
-				log "warn" "CNAME '${tmp}' could not be resolved. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
-				continue;
+			# Try ping command first
+			tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"
+			if ! is_ip4 "${tmp}"; then
+				# Try dig command second
+				tmp="$( dig @8.8.8.8 +short "${my_add}" A )"
+				if ! is_ip4 "${tmp}"; then
+					log "warn" "CNAME '${my_add}' could not be resolved. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
+					continue;
+				fi
 			fi
-			log "info" "CNAME '${tmp}' resolved to: ${my_add}" "${DEBUG_ENTRYPOINT}"
+			log "info" "CNAME '${my_add}' resolved to: ${tmp}" "${DEBUG_ENTRYPOINT}"
+			my_add="${tmp}"
 		fi
 
 		# If specified address is not a valid IPv4 address, skip it
