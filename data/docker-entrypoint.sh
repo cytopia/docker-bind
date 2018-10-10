@@ -137,7 +137,8 @@ is_ip4() {
 ###
 is_cname() {
 	local string="${1}"
-	local regex='^([0-9A-Za-z]{2,}\.)*[0-9A-Za-z]{2,}$'
+	# https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
+	local regex='^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
 
 	# Is an IP already
 	if is_ip4 "${string}"; then
@@ -479,7 +480,9 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
 		if is_cname "${my_add}"; then
 			# Try ping command first
-			tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"
+			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
+				tmp="${my_add}"
+			fi
 			if ! is_ip4 "${tmp}"; then
 				# Try dig command second
 				tmp="$( dig @8.8.8.8 +short "${my_add}" A )"
@@ -530,7 +533,9 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; t
 		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
 		if is_cname "${my_add}"; then
 			# Try ping command first
-			tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"
+			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
+				tmp="${my_add}"
+			fi
 			if ! is_ip4 "${tmp}"; then
 				# Try dig command second
 				tmp="$( dig @8.8.8.8 +short "${my_add}" A )"
