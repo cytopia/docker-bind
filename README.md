@@ -34,6 +34,8 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
         8. [RETRY_TIME](#retry_time)
         9. [EXPIRY_TIME](#expiry_time)
         10. [MAX_CACHE_TIME](#max_cache_time)
+        11. [ALLOW_QUERY](#allow_query)
+        12. [ALLOW_RECURSION](#allow_recursion)        
 2. [Default mountpoints](#default-mountpoints)
 3. [Default ports](#default-ports)
 4. [Examples](#examples)
@@ -44,6 +46,7 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
     5. [Wildcard TLD and reverse DNS entry](#wildcard-tld-and-reverse-dns-entry)
     6. [Wildcard TLD and DNS resolver](#wildcard-tld-and-dns-resolver)
     7. [Wildcard TLD, DNS resolver and extra hosts](#wildcard-tld-dns-resolver-and-extra-hosts)
+    8. [Extra hosts, DNS resolver, allow query, and allow recursion](#extra-hosts-dns-resolver-allow-query-and-allow-recursion)
 5. [Host integration](#host-integration)
 6. [Support](#support)
 7. [License](#license)
@@ -71,7 +74,8 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
 | `RETRY_TIME`       | int    | `180`     | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
 | `EXPIRY_TIME`      | int    | `1209600` | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
 | `MAX_CACHE_TIME`   | int    | `10800`   | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
-
+| `ALLOW_QUERY`      | string |           | Specify a comma separated list of IP addresses with optional CIDR mask to allow queries from a specific IP address or ranges of IP addresses. This allows for control over who is allowed to query the DNS server.<br/>Example: `ALLOW_QUERY=192.168.1.0/24,127.0.0.1` |
+| `ALLOW_RECURSION`  | string |           | Specify a comma separated list of IP addresses with optional CIDR mask to allow queries from a specific IP address or ranges of IP addresses.  This option allows this DNS server to forward a request to another DNS server when an address cannot be resolved. <br/>Example: `ALLOW_RECURSION=192.168.1.0/24,127.0.0.1` |
 #### DEBUG_ENTRYPOINT
 
 * If set to `0`, only warnings and errors are shown
@@ -180,7 +184,7 @@ The `DNSSEC_VALIDATE` variable defines the DNSSEC validation. Default is to not 
 Possible values are:
 
 * `yes` - DNSSEC validation is enabled, but a trust anchor must be manually configured. No validation will actually take place.
-* `no` - DNSSEC validation is disabled, and recursive server will behave in the "old fashioned" way of performing insecure DNS lookups, until you have manually configured at least one trusted key. 
+* `no` - DNSSEC validation is disabled, and recursive server will behave in the "old fashioned" way of performing insecure DNS lookups, until you have manually configured at least one trusted key.
 * `auto` - DNSSEC validation is enabled, and a default trust anchor (included as part of BIND) for the DNS root zone is used.
 
 #### DNS_FORWARDER
@@ -222,6 +226,39 @@ For more information regarding this setting, see [BIND SOA](http://www.zytrax.co
 Specify time in seconds.
 For more information regarding this setting, see [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html)
 
+#### ALLOW_QUERY
+
+By default this dockerized BIND does not specify query rules.  This exposes the
+allow-query options to specify who is allowed to query for results.
+Note that ACLs are not yet handled.
+
+```bash
+# Structure (comma separated list of IP addresses, IP addresses with CIDR mask, or address match list names "none", "any", "localhost", and "localnets")
+ALLOW_QUERY='192.168.1.0/24,127.0.0.1'
+```
+
+Some examples
+```bash
+ALLOW_QUERY='any'
+ALLOW_QUERY='192.168.1.0/24,127.0.0.1'
+```
+
+#### ALLOW_RECURSION
+
+By default this dockerized BIND does not allow DNS recursion. If BIND cannot resolve an address it
+will act as a DNS client and forward the request to another DNS server.  This server is specified in the DNS_FORWARDER list.
+Note that ACLs are not yet handled.
+
+```bash
+# Structure (comma separated list of IP addresses, IP addresses with CIDR mask, or address match list names "none", "any", "localhost", and "localnets")
+ALLOW_RECURSION='192.168.1.0/24,127.0.0.1'
+```
+
+Some examples
+```bash
+ALLOW_RECURSION='any'
+ALLOW_RECURSION='192.168.1.0/24,127.0.0.1'
+```
 
 ## Default mount points
 
@@ -338,6 +375,28 @@ $ docker run -i \
     -t cytopia/bind
 ```
 
+#### Extra hosts, DNS resolver, allow query, and allow recursion
+
+* Your trusted external DNS servers are `8.8.8.8` and `8.8.4.4` (google DNS servers)
+* Allow queries from:
+    - All 192.168.0.xxx addresses
+    - Localhost aka 127.0.0.1
+* Allow recursion to resolve other queries (such as www.google.com) from:
+    - All 192.168.0.xxx addresses
+    - Localhost aka 127.0.0.1
+* Add an extra hosts with custom DNS:
+    - host1 -> 192.168.0.11
+
+```bash
+$ docker run -i \
+    -p 53:53/tcp \
+    -p 53:53/udp \
+    -e EXTRA_HOSTS='host1=192.168.0.11' \
+    -e DNS_FORWARDER=8.8.8.8,8.8.4.4 \
+    -e ALLOW_QUERY=192.168.0.0/24,127.0.0.1 \
+    -e ALLOW_RECURSION=192.168.0.0/24,127.0.0.1 \
+    -t cytopia/bind
+```
 
 ## Host integration
 

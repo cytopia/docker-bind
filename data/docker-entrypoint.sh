@@ -161,6 +161,19 @@ is_ipv4_or_mask() {
 }
 
 ###
+### Check if a value matches any of four predefined address match list names
+###
+is_address_match_list() {
+	# Matches "any" or "none" or "localhost" or "localnets"
+	if [[ "${1}" == "any" || "${1}" == "none" || "${1}" == "localhost" || "${1}" == "localnets" ]] ; then
+		return 0
+	fi
+
+	# Failure
+	return 1
+}
+
+###
 ### Check if a value is a valid cname
 ###
 is_cname() {
@@ -628,7 +641,7 @@ else
 	while read ip ; do
 		ip="$( echo "${ip}" | xargs )"
 
-		if ! is_ipv4_or_mask "${ip}"; then
+		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
 			log "err" "ALLOW_QUERY error: not a valid IPv4 address with optional mask: ${ip}" "${DEBUG_ENTRYPOINT}"
 			exit 1
 		fi
@@ -667,7 +680,7 @@ else
 	while read ip ; do
 		ip="$( echo "${ip}" | xargs )"
 
-		if ! is_ipv4_or_mask "${ip}"; then
+		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
 			log "err" "ALLOW_RECURSION error: not a valid IPv4 address with optional mask: ${ip}" "${DEBUG_ENTRYPOINT}"
 			exit 1
 		fi
