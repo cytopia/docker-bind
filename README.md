@@ -74,8 +74,8 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
 | `RETRY_TIME`       | int    | `180`     | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
 | `EXPIRY_TIME`      | int    | `1209600` | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
 | `MAX_CACHE_TIME`   | int    | `10800`   | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
-| `ALLOW_QUERY`      | string |           | Specify a comma separated list of IP addresses with optional CIDR mask to allow queries from a specific IP address or ranges of IP addresses. This allows for control over who is allowed to query the DNS server.<br/>Example: `ALLOW_QUERY=192.168.1.0/24,127.0.0.1` |
-| `ALLOW_RECURSION`  | string |           | Specify a comma separated list of IP addresses with optional CIDR mask to allow queries from a specific IP address or ranges of IP addresses.  This option allows this DNS server to forward a request to another DNS server when an address cannot be resolved. <br/>Example: `ALLOW_RECURSION=192.168.1.0/24,127.0.0.1` |
+| `ALLOW_QUERY`      | string |           | Specify a comma separated list of IP addresses with optional CIDR mask to allow queries from a specific IP address or ranges of IP addresses. This allows for control over who is allowed to query the DNS server. If not specified all hosts are allowed to make queries (defaults to `any`). See [BIND QUERIES](http://www.zytrax.com/books/dns/ch7/queries.html) <br/>Example: `ALLOW_QUERY=192.168.1.0/24,127.0.0.1` |
+| `ALLOW_RECURSION`  | string |           | Specify a comma separated list of IP addresses with optional CIDR mask to allow queries from a specific IP address or ranges of IP addresses.  This option allows this DNS server to forward a request to another DNS server when an address cannot be resolved. If not present present the allow-query-cache default is assumed. See [BIND QUERIES](http://www.zytrax.com/books/dns/ch7/queries.html) <br/>Example: `ALLOW_RECURSION=192.168.1.0/24,127.0.0.1` |
 #### DEBUG_ENTRYPOINT
 
 * If set to `0`, only warnings and errors are shown
