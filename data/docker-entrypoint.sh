@@ -25,6 +25,8 @@ NAMED_LOG_CONF="${NAMED_DIR}/named.conf.logging"
 DEFAULT_DEBUG_ENTRYPOINT=1
 DEFAULT_DOCKER_LOGS=0
 DEFAULT_DNSSEC_VALIDATE="no"
+DEFAULT_CHECK_NAMES="fail"
+
 
 ###
 ### Default time variables (time in seconds)
@@ -164,6 +166,7 @@ add_options() {
 	local config_file="${1}"
 	local dnssec_validate="${2}"
 	local forwarders="${3}"
+	local check_names="${4}"
 
 	{
 		echo "options {"
@@ -171,6 +174,7 @@ add_options() {
 		echo "    dnssec-validation ${dnssec_validate};"
 		echo "    auth-nxdomain no;    # conform to RFC1035"
 		echo "    listen-on-v6 { any; };"
+		echo "    check-names ${check_names};"
 		if [ -n "${forwarders}" ]; then
 			echo "    forwarders {"
 			printf       "${forwarders}"
@@ -594,13 +598,34 @@ log "info" "DNSSEC Validation: ${DNSSEC_VALIDATE}" "${DEBUG_ENTRYPOINT}"
 
 
 ###
+### Check-names policy
+###
+if printenv CHECK_NAMES >/dev/null 2>&1; then
+	CHECK_NAMES="$( printenv CHECK_NAMES )"
+	if [ "${CHECK_NAMES}" = "fail" ]; then
+		CHECK_NAMES="${CHECK_NAMES}"
+	elif [ "${CHECK_NAMES}" = "warn" ]; then
+		CHECK_NAMES="${CHECK_NAMES}"
+	elif [ "${CHECK_NAMES}" = "ignore" ]; then
+		CHECK_NAMES="${CHECK_NAMES}"
+	else
+		log "warning" "Wrong value for check-names policy: '${CHECK_NAMES}'. Setting it to '${DEFAULT_CHECK_NAMES}'" "${DEBUG_ENTRYPOINT}"
+		CHECK_NAMES="${DEFAULT_CHECK_NAMES}"
+	fi
+else
+	warn docstore.mik.ua/orelly/networking_2ndEd/dns/ch04_05.htm="${DEFAULT_CHECK_NAMES}"
+fi
+log "info" "Check-names policy: ${CHECK_NAMES}" "${DEBUG_ENTRYPOINT}"
+
+
+###
 ### Forwarder
 ###
 if ! printenv DNS_FORWARDER >/dev/null 2>&1; then
 	log "info" "\$DNS_FORWARDER not set." "${DEBUG_ENTRYPOINT}"
 	log "info" "No custom DNS server will be used as forwarder" "${DEBUG_ENTRYPOINT}"
 
-	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" ""
+	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" "" "${CHECK_NAMES}"
 else
 
 	# To be pupulated
@@ -631,10 +656,8 @@ else
 	fi
 
 	log "info" "Adding custom DNS forwarder: ${DNS_FORWARDER}" "${DEBUG_ENTRYPOINT}"
-	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" "${_forwarders_block}"
+	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" "${_forwarders_block}" "${CHECK_NAMES}"
 fi
-
-
 
 ###
 ### Start
