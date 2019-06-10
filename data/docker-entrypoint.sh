@@ -133,6 +133,47 @@ is_ip4() {
 }
 
 ###
+### Check if a value is a valid IPv4 address with CIDR mask
+###
+is_ipv4_with_mask() {
+	local string="${1}"
+
+	# http://blog.markhatton.co.uk/2011/03/15/regular-expressions-for-ip-addresses-cidr-ranges-and-hostnames/
+	if ! echo "${1}" | grep -Eq '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(3[0-2]|[1-2][0-9]|[0-9]))$'; then
+		return 1
+	fi
+
+	# All tests passed
+	return 0
+}
+
+###
+### Check if a value is a valid IPv4 address or IPv4 address with CIDR mask
+###
+is_ipv4_or_mask() {
+	# Is IPv4 or IPv4 with mask
+	if is_ip4 "${1}" || is_ipv4_with_mask "${1}"; then
+		return 0
+	fi
+
+	# Failure
+	return 1
+}
+
+###
+### Check if a value matches any of four predefined address match list names
+###
+is_address_match_list() {
+	# Matches "any" or "none" or "localhost" or "localnets"
+	if [[ "${1}" == "any" || "${1}" == "none" || "${1}" == "localhost" || "${1}" == "localnets" ]] ; then
+		return 0
+	fi
+
+	# Failure
+	return 1
+}
+
+###
 ### Check if a value is a valid cname
 ###
 is_cname() {
@@ -160,10 +201,14 @@ is_cname() {
 # @param config_file      Where to store this configuration in.
 # @param dnssec_validate  dnssec-validation setting
 # @param forwarders       formated (newline separated and trailing semi-colon) string of ip addr
+# @param allow_query      formated (newline separated and trailing semi-colon) string of ipv4 addr with optional mask
+# @param allow_recursion  formated (newline separated and trailing semi-colon) string of ipv4 addr with optional mask
 add_options() {
 	local config_file="${1}"
 	local dnssec_validate="${2}"
 	local forwarders="${3}"
+	local allow_query="${4}"
+	local allow_recursion="${5}"
 
 	{
 		echo "options {"
@@ -175,6 +220,17 @@ add_options() {
 			echo "    forwarders {"
 			printf       "${forwarders}"
 			echo "    };"
+		fi
+		if [ -n "${allow_recursion}" ]; then
+			echo "    recursion yes;"
+			echo "    allow-recursion {"
+			printf        "${allow_recursion}"
+			echo "    };"
+		fi
+		if [ -n "${allow_query}" ]; then
+			echo "    allow-query {"
+			printf        "${allow_query}"
+		  echo "    };"
 		fi
 		echo "};"
 	} > "${config_file}"
@@ -572,6 +628,84 @@ fi
 
 
 ###
+### Allow query
+###
+_allow_query_block=""
+if ! printenv ALLOW_QUERY >/dev/null 2>&1; then
+	log "info" "\$ALLOW_QUERY not set." "${DEBUG_ENTRYPOINT}"
+	log "info" "DNS query rules will not be set" "${DEBUG_ENTRYPOINT}"
+else
+	# Transform into newline separated forwards and loop over:
+	#   x.x.x.x\n
+	#   y.y.y.y\n
+	while read ip ; do
+		ip="$( echo "${ip}" | xargs )"
+
+		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
+			log "err" "ALLOW_QUERY error: not a valid IPv4 address with optional mask: ${ip}" "${DEBUG_ENTRYPOINT}"
+			exit 1
+		fi
+
+		if [ -z "${_allow_query_block}" ]; then
+			_allow_query_block="        ${ip};"
+		else
+			_allow_query_block="${_allow_query_block}\n        ${ip};"
+		fi
+	done <<< "$(echo "$( printenv ALLOW_QUERY )" | sed 's/,/\n/g' )"
+
+
+	if [ -z "${_allow_query_block}" ]; then
+		log "err" "ALLOW_QUERY error: variable specified, but no IP addresses found." "${DEBUG_ENTRYPOINT}"
+		exit 1
+	fi
+
+	log "info" "Adding custom allow-query options: ${ALLOW_QUERY}" "${DEBUG_ENTRYPOINT}"
+	# Add quotes here
+	_allow_query_block="${_allow_query_block}"
+fi
+
+
+
+###
+### Allow recursion
+###
+_allow_recursion_block=""
+if ! printenv ALLOW_RECURSION >/dev/null 2>&1; then
+	log "info" "\$ALLOW_RECURSION not set." "${DEBUG_ENTRYPOINT}"
+	log "info" "DNS recursion rules will not be set" "${DEBUG_ENTRYPOINT}"
+else
+	# Transform into newline separated forwards and loop over:
+	#   x.x.x.x\n
+	#   y.y.y.y\n
+	while read ip ; do
+		ip="$( echo "${ip}" | xargs )"
+
+		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
+			log "err" "ALLOW_RECURSION error: not a valid IPv4 address with optional mask: ${ip}" "${DEBUG_ENTRYPOINT}"
+			exit 1
+		fi
+
+		if [ -z "${_allow_recursion_block}" ]; then
+			_allow_recursion_block="        ${ip};"
+		else
+			_allow_recursion_block="${_allow_recursion_block}\n        ${ip};"
+		fi
+	done <<< "$(echo "$( printenv ALLOW_RECURSION )" | sed 's/,/\n/g' )"
+
+
+	if [ -z "${_allow_recursion_block}" ]; then
+		log "err" "ALLOW_RECURSION error: variable specified, but no IP addresses found." "${DEBUG_ENTRYPOINT}"
+		exit 1
+	fi
+
+	log "info" "Adding custom allow-recursion options: ${ALLOW_RECURSION}" "${DEBUG_ENTRYPOINT}"
+	# Add quotes here
+	_allow_recursion_block="${_allow_recursion_block}"
+fi
+
+
+
+###
 ### DNSSEC validation
 ###
 if printenv DNSSEC_VALIDATE >/dev/null 2>&1; then
@@ -600,7 +734,7 @@ if ! printenv DNS_FORWARDER >/dev/null 2>&1; then
 	log "info" "\$DNS_FORWARDER not set." "${DEBUG_ENTRYPOINT}"
 	log "info" "No custom DNS server will be used as forwarder" "${DEBUG_ENTRYPOINT}"
 
-	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" ""
+	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" "" "${_allow_query_block}" "${_allow_recursion_block}"
 else
 
 	# To be pupulated
@@ -631,10 +765,8 @@ else
 	fi
 
 	log "info" "Adding custom DNS forwarder: ${DNS_FORWARDER}" "${DEBUG_ENTRYPOINT}"
-	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" "${_forwarders_block}"
+	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" "${_forwarders_block}" "${_allow_query_block}" "${_allow_recursion_block}"
 fi
-
-
 
 ###
 ### Start
