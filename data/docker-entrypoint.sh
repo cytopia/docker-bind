@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+if [[ "${DEBUG}" == "true" ]]; then
+    set -x
+fi
 set -e
 set -u
 set -o pipefail
@@ -191,6 +194,18 @@ is_cname() {
 }
 
 
+###
+### Check if a value has multiple lines
+###
+is_multiline() {
+	local string="${1}"
+
+	# Match for valid CNAME
+	(( $(grep -c . <<<"$string") > 1 ))
+}
+
+
+
 
 #################################################################################
 # ACTION FUNCTIONS
@@ -312,26 +327,40 @@ add_wildcard_zone() {
 	} > "${conf_file}"
 
 	# Forward Zone
-	{
-		echo "\$TTL  ${ttl_time}"
-		echo "@      IN SOA  ${domain}. root.${domain}. ("
-		echo "                 ${serial}           ; Serial number of zone file"
-		echo "                 ${refresh_time}     ; Refresh time"
-		echo "                 ${retry_time}       ; Retry time in case of problem"
-		echo "                 ${expiry_time}      ; Expiry time"
-		echo "                 ${max_cache_time} ) ; Maximum caching time in case of failed lookups"
-		echo ";"
-		echo "       IN NS     ns1.${domain}."
-		echo "       IN NS     ns2.${domain}."
-		echo "       IN A      ${address}"
-		echo ";"
-		echo "ns1    IN A      ${address}"
-		echo "ns2    IN A      ${address}"
-		if [ "${wildcard}" -eq "1" ]; then
-			echo "*      IN A      ${address}"
-		fi
-	} > "${zone_file}"
-
+	if is_ip4 "${address}" || is_cname "${address}"; then
+		{
+			echo "\$TTL  ${ttl_time}"
+			echo "@      IN SOA  ${domain}. root.${domain}. ("
+			echo "                 ${serial}           ; Serial number of zone file"
+			echo "                 ${refresh_time}     ; Refresh time"
+			echo "                 ${retry_time}       ; Retry time in case of problem"
+			echo "                 ${expiry_time}      ; Expiry time"
+			echo "                 ${max_cache_time} ) ; Maximum caching time in case of failed lookups"
+			echo ";"
+			if is_ip4 "${address}"; then
+				echo "       IN NS     ns1.${domain}."
+				echo "       IN NS     ns2.${domain}."
+				echo "       IN A      ${address}"
+				echo ";"
+				echo "ns1    IN A      ${address}"
+				echo "ns2    IN A      ${address}"
+				if [ "${wildcard}" -eq "1" ]; then
+					echo "*      IN A      ${address}"
+				fi
+			else # then it's cname
+				echo "       IN NS     ${address}."
+				echo ";"
+				if [ "${wildcard}" -eq "1" ]; then
+					echo "*      IN CNAME      ${address}."
+				else
+					echo "       IN CNAME      ${address}."
+				fi
+			fi
+		} > "${zone_file}"
+	else
+		log "err" "Invalid address ${address} - neither IP nor CNAME." "${debug_level}"
+		exit
+	fi
 	# Reverse Zone
 	if [ -n "${reverse}" ]; then
 		{
@@ -536,24 +565,30 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
 		if is_cname "${my_add}"; then
 			# Try ping command first
-			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
+			if ! tmp="$( ping -c1 -W1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
 				tmp="${my_add}"
 			fi
 			if ! is_ip4 "${tmp}"; then
 				# Try dig command second
 				tmp="$( dig @8.8.8.8 +short "${my_add}" A )"
-				if ! is_ip4 "${tmp}"; then
+				if is_multiline "${tmp}"; then
+					# assuming it's a valid CNAME pointing to a Load Balancer with dynamic IPs - CNAME -> A ALIAS
+					# or it a CNAME pointing to another CNAME
+					my_add2="${my_add}"
+				elif ! is_ip4 "${tmp}"; then
+					log "info" "CNAME '${my_add}' resolved to: ${tmp}" "${DEBUG_ENTRYPOINT}"
+					my_add="${tmp}"
+				else
 					log "warn" "CNAME '${my_add}' could not be resolved. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
 					continue;
 				fi
 			fi
-			log "info" "CNAME '${my_add}' resolved to: ${tmp}" "${DEBUG_ENTRYPOINT}"
-			my_add="${tmp}"
+
 		fi
 
 		# If specified address is not a valid IPv4 address, skip it
-		if ! is_ip4 "${my_add}"; then
-			log "warn" "Invalid IP address '${my_add}': for *.${my_dom} -> ${my_add}. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
+		if ! is_ip4 "${my_add}" && ! is_cname "${my_add}"; then
+			log "warn" "Invalid IP/CNAME address '${my_add}': for *.${my_dom} -> ${my_add}. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
 			continue;
 		fi
 
@@ -569,7 +604,6 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 			"${DEBUG_ENTRYPOINT}"
 	done
 fi
-
 
 
 ###
@@ -589,24 +623,30 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; t
 		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
 		if is_cname "${my_add}"; then
 			# Try ping command first
-			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
+			if ! tmp="$( ping -c1 -W1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
 				tmp="${my_add}"
 			fi
 			if ! is_ip4 "${tmp}"; then
 				# Try dig command second
 				tmp="$( dig @8.8.8.8 +short "${my_add}" A )"
-				if ! is_ip4 "${tmp}"; then
+				if is_multiline "${tmp}"; then
+					# assuming it's a valid CNAME pointing to a Load Balancer with dynamic IPs - CNAME -> A ALIAS
+					# or it a CNAME pointing to another CNAME
+					my_add2="${my_add}"
+				elif ! is_ip4 "${tmp}"; then
+					log "info" "CNAME '${my_add}' resolved to: ${tmp}" "${DEBUG_ENTRYPOINT}"
+					my_add="${tmp}"
+				else
 					log "warn" "CNAME '${my_add}' could not be resolved. Skipping to add extra host" "${DEBUG_ENTRYPOINT}"
 					continue;
 				fi
 			fi
-			log "info" "CNAME '${my_add}' resolved to: ${tmp}" "${DEBUG_ENTRYPOINT}"
-			my_add="${tmp}"
+
 		fi
 
 		# If specified address is not a valid IPv4 address, skip it
-		if ! is_ip4 "${my_add}"; then
-			log "warn" "Invalid IP address '${my_add}': for ${my_dom} -> ${my_add}. Skipping to add extra host" "${DEBUG_ENTRYPOINT}"
+		if ! is_ip4 "${my_add}" && ! is_cname "${my_add}"; then
+			log "warn" "Invalid IP/CNAME address '${my_add}': for *.${my_dom} -> ${my_add}. Skipping to add extra host" "${DEBUG_ENTRYPOINT}"
 			continue;
 		fi
 
