@@ -773,4 +773,4 @@ fi
 ###
 log "info" "Starting $( named -V | grep -oiE '^BIND[[:space:]]+[0-9.]+' )" "${DEBUG_ENTRYPOINT}"
 named-checkconf "${NAMED_CONF}"
-exec /usr/sbin/named -4 -c /etc/bind/named.conf -u bind -f
+exec /usr/sbin/named -4 -c "${NAMED_CONF}" -u bind -f
