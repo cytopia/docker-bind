@@ -528,9 +528,9 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 	#  com=1.2.3.4[=com]
 	#  de=2.3.4.5
 	echo "${WILDCARD_DNS}" | sed 's/,/\n/g' | while read line ; do
-		my_dom="$( echo "${line}" | awk -F '=' '{print $1}' | xargs )"  # domain
-		my_add="$( echo "${line}" | awk -F '=' '{print $2}' | xargs )"  # IP address
-		my_rev="$( echo "${line}" | awk -F '=' '{print $3}' | xargs )"  # Reverse DNS record
+		my_dom="$( echo "${line}" | awk -F '=' '{print $1}' | xargs -0 )"  # domain
+		my_add="$( echo "${line}" | awk -F '=' '{print $2}' | xargs -0 )"  # IP address
+		my_rev="$( echo "${line}" | awk -F '=' '{print $3}' | xargs -0 )"  # Reverse DNS record
 		my_cfg="${NAMED_DIR}/devilbox-wildcard_dns.${my_dom}.conf"
 
 		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
@@ -581,9 +581,9 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; t
 	#  com=1.2.3.4
 	#  de=2.3.4.5
 	echo "${EXTRA_HOSTS}" | sed 's/,/\n/g' | while read line ; do
-		my_dom="$( echo "${line}" | awk -F '=' '{print $1}' | xargs )"  # domain
-		my_add="$( echo "${line}" | awk -F '=' '{print $2}' | xargs )"  # IP address
-		my_rev="$( echo "${line}" | awk -F '=' '{print $3}' | xargs )"  # Reverse DNS record
+		my_dom="$( echo "${line}" | awk -F '=' '{print $1}' | xargs -0 )"  # domain
+		my_add="$( echo "${line}" | awk -F '=' '{print $2}' | xargs -0 )"  # IP address
+		my_rev="$( echo "${line}" | awk -F '=' '{print $3}' | xargs -0 )"  # Reverse DNS record
 		my_cfg="${NAMED_DIR}/devilbox-extra_hosts.${my_dom}.conf"
 
 		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
@@ -639,7 +639,7 @@ else
 	#   x.x.x.x\n
 	#   y.y.y.y\n
 	while read ip ; do
-		ip="$( echo "${ip}" | xargs )"
+		ip="$( echo "${ip}" | xargs -0 )"
 
 		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
 			log "err" "ALLOW_QUERY error: not a valid IPv4 address with optional mask: ${ip}" "${DEBUG_ENTRYPOINT}"
@@ -678,7 +678,7 @@ else
 	#   x.x.x.x\n
 	#   y.y.y.y\n
 	while read ip ; do
-		ip="$( echo "${ip}" | xargs )"
+		ip="$( echo "${ip}" | xargs -0 )"
 
 		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
 			log "err" "ALLOW_RECURSION error: not a valid IPv4 address with optional mask: ${ip}" "${DEBUG_ENTRYPOINT}"
@@ -744,7 +744,7 @@ else
 	#   x.x.x.x\n
 	#   y.y.y.y\n
 	while read ip ; do
-		ip="$( echo "${ip}" | xargs )"
+		ip="$( echo "${ip}" | xargs -0 )"
 
 		if ! is_ip4 "${ip}"; then
 			log "err" "DNS_FORWARDER error: not a valid IP address: ${ip}" "${DEBUG_ENTRYPOINT}"
