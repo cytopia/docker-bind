@@ -1,5 +1,5 @@
-FROM debian:buster-slim
-MAINTAINER "cytopia" <cytopia@everythingcli.org>
+FROM debian:stable-slim
+LABEL org.opencontainers.image.authors="cytopia@everythingcli.org"
 
 
 ###
