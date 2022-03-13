@@ -4,6 +4,11 @@ set -e
 set -u
 set -o pipefail
 
+# Enable debug of entrypoint
+if [ "${DEBUG:-}" = "1" ]; then
+	set -x
+fi
+
 
 #################################################################################
 # VARIABLES

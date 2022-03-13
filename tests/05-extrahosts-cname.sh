@@ -19,7 +19,7 @@ PORT="5300"
 
 
 # DEBUG_ENTRYPOINT=2
-run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG_ENTRYPOINT=2 -e 'EXTRA_HOSTS=www.devilbox=google.com' -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
+run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=1 -e DEBUG_ENTRYPOINT=2 -e 'EXTRA_HOSTS=www.devilbox=google.com' -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
 run "sleep 5"
 sanity_check "${NAME}"
 if [ "$( dig @127.0.0.1 -p ${PORT} +short www.devilbox | wc -l )" = "0" ]; then
@@ -34,7 +34,7 @@ run "docker stop ${NAME}"
 
 
 # DEBUG_ENTRYPOINT=1
-run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG_ENTRYPOINT=1 -e 'EXTRA_HOSTS=www.devilbox=google.com' -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
+run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=1 -e DEBUG_ENTRYPOINT=1 -e 'EXTRA_HOSTS=www.devilbox=google.com' -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
 run "sleep 5"
 sanity_check "${NAME}"
 if [ "$( dig @127.0.0.1 -p ${PORT} +short www.devilbox | wc -l )" = "0" ]; then
@@ -49,7 +49,7 @@ run "docker stop ${NAME}"
 
 
 # DEBUG_ENTRYPOINT=0
-run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG_ENTRYPOINT=0 -e 'EXTRA_HOSTS=www.devilbox=google.com' -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
+run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=1 -e DEBUG_ENTRYPOINT=0 -e 'EXTRA_HOSTS=www.devilbox=google.com' -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
 run "sleep 5"
 sanity_check "${NAME}"
 if [ "$( dig @127.0.0.1 -p ${PORT} +short www.devilbox | wc -l )" = "0" ]; then
@@ -64,7 +64,7 @@ run "docker stop ${NAME}"
 
 
 # DEBUG_ENTRYPOINT=null
-run "docker run --rm --platform ${ARCH} --name ${NAME} -e 'EXTRA_HOSTS=www.devilbox=google.com' -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
+run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=1 -e 'EXTRA_HOSTS=www.devilbox=google.com' -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
 run "sleep 5"
 sanity_check "${NAME}"
 if [ "$( dig @127.0.0.1 -p ${PORT} +short www.devilbox | wc -l )" = "0" ]; then
