@@ -218,18 +218,18 @@ add_options() {
 		echo "    listen-on-v6 { any; };"
 		if [ -n "${forwarders}" ]; then
 			echo "    forwarders {"
-			printf       "${forwarders}"
+			printf       "%s" "${forwarders}"
 			echo "    };"
 		fi
 		if [ -n "${allow_recursion}" ]; then
 			echo "    recursion yes;"
 			echo "    allow-recursion {"
-			printf        "${allow_recursion}"
+			printf        "%s" "${allow_recursion}"
 			echo "    };"
 		fi
 		if [ -n "${allow_query}" ]; then
 			echo "    allow-query {"
-			printf        "${allow_query}"
+			printf        "%s" "${allow_query}"
 		  echo "    };"
 		fi
 		echo "};"
@@ -398,8 +398,6 @@ if printenv DEBUG_ENTRYPOINT >/dev/null 2>&1; then
 		elif [ "${DEBUG_ENTRYPOINT}" -gt "2" ]; then
 			log "warn" "Wrong value for DEBUG_ENTRYPOINT: '${DEBUG_ENTRYPOINT}'. Setting to ${DEFAULT_DEBUG_ENTRYPOINT}" "2"
 			DEBUG_ENTRYPOINT="${DEFAULT_DEBUG_ENTRYPOINT}"
-		else
-			DEBUG_ENTRYPOINT="${DEBUG_ENTRYPOINT}"
 		fi
 	fi
 else
@@ -527,7 +525,7 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 	# Convert 'com=1.2.3.4[=com],de=2.3.4.5' into newline separated string:
 	#  com=1.2.3.4[=com]
 	#  de=2.3.4.5
-	echo "${WILDCARD_DNS}" | sed 's/,/\n/g' | while read line ; do
+	echo "${WILDCARD_DNS}" | sed 's/,/\n/g' | while read -r line ; do
 		my_dom="$( echo "${line}" | awk -F '=' '{print $1}' | xargs -0 )"  # domain
 		my_add="$( echo "${line}" | awk -F '=' '{print $2}' | xargs -0 )"  # IP address
 		my_rev="$( echo "${line}" | awk -F '=' '{print $3}' | xargs -0 )"  # Reverse DNS record
@@ -580,7 +578,7 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; t
 	# Convert 'com=1.2.3.4[=com],de=2.3.4.5' into newline separated string:
 	#  com=1.2.3.4
 	#  de=2.3.4.5
-	echo "${EXTRA_HOSTS}" | sed 's/,/\n/g' | while read line ; do
+	echo "${EXTRA_HOSTS}" | sed 's/,/\n/g' | while read -r line ; do
 		my_dom="$( echo "${line}" | awk -F '=' '{print $1}' | xargs -0 )"  # domain
 		my_add="$( echo "${line}" | awk -F '=' '{print $2}' | xargs -0 )"  # IP address
 		my_rev="$( echo "${line}" | awk -F '=' '{print $3}' | xargs -0 )"  # Reverse DNS record
@@ -638,7 +636,7 @@ else
 	# Transform into newline separated forwards and loop over:
 	#   x.x.x.x\n
 	#   y.y.y.y\n
-	while read ip ; do
+	while read -r ip ; do
 		ip="$( echo "${ip}" | xargs -0 )"
 
 		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
@@ -651,7 +649,7 @@ else
 		else
 			_allow_query_block="${_allow_query_block}\n        ${ip};"
 		fi
-	done <<< "$(echo "$( printenv ALLOW_QUERY )" | sed 's/,/\n/g' )"
+	done <<< "$( printenv ALLOW_QUERY | sed 's/,/\n/g' )"
 
 
 	if [ -z "${_allow_query_block}" ]; then
@@ -659,9 +657,10 @@ else
 		exit 1
 	fi
 
+	# shellcheck disable=SC2153
 	log "info" "Adding custom allow-query options: ${ALLOW_QUERY}" "${DEBUG_ENTRYPOINT}"
 	# Add quotes here
-	_allow_query_block="${_allow_query_block}"
+	#_allow_query_block="${_allow_query_block}"
 fi
 
 
@@ -677,7 +676,7 @@ else
 	# Transform into newline separated forwards and loop over:
 	#   x.x.x.x\n
 	#   y.y.y.y\n
-	while read ip ; do
+	while read -r ip ; do
 		ip="$( echo "${ip}" | xargs -0 )"
 
 		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
@@ -690,7 +689,7 @@ else
 		else
 			_allow_recursion_block="${_allow_recursion_block}\n        ${ip};"
 		fi
-	done <<< "$(echo "$( printenv ALLOW_RECURSION )" | sed 's/,/\n/g' )"
+	done <<< "$( printenv ALLOW_RECURSION | sed 's/,/\n/g' )"
 
 
 	if [ -z "${_allow_recursion_block}" ]; then
@@ -698,9 +697,10 @@ else
 		exit 1
 	fi
 
+	# shellcheck disable=SC2153
 	log "info" "Adding custom allow-recursion options: ${ALLOW_RECURSION}" "${DEBUG_ENTRYPOINT}"
 	# Add quotes here
-	_allow_recursion_block="${_allow_recursion_block}"
+	#_allow_recursion_block="${_allow_recursion_block}"
 fi
 
 
@@ -711,11 +711,11 @@ fi
 if printenv DNSSEC_VALIDATE >/dev/null 2>&1; then
 	DNSSEC_VALIDATE="$( printenv DNSSEC_VALIDATE )"
 	if [ "${DNSSEC_VALIDATE}" = "auto" ]; then
-		DNSSEC_VALIDATE="${DNSSEC_VALIDATE}"
+		DNSSEC_VALIDATE="auto"
 	elif [ "${DNSSEC_VALIDATE}" = "yes" ]; then
-		DNSSEC_VALIDATE="${DNSSEC_VALIDATE}"
+		DNSSEC_VALIDATE="yes"
 	elif [ "${DNSSEC_VALIDATE}" = "no" ]; then
-		DNSSEC_VALIDATE="${DNSSEC_VALIDATE}"
+		DNSSEC_VALIDATE="no"
 	else
 		log "warning" "Wrong value for DNSSEC_VALIDATE: '${DNSSEC_VALIDATE}'. Setting it to '${DEFAULT_DNSSEC_VALIDATE}'" "${DEBUG_ENTRYPOINT}"
 		DNSSEC_VALIDATE="${DEFAULT_DNSSEC_VALIDATE}"
@@ -743,7 +743,7 @@ else
 	# Transform into newline separated forwards and loop over:
 	#   x.x.x.x\n
 	#   y.y.y.y\n
-	while read ip ; do
+	while read -r ip ; do
 		ip="$( echo "${ip}" | xargs -0 )"
 
 		if ! is_ip4 "${ip}"; then
@@ -756,7 +756,7 @@ else
 		else
 			_forwarders_block="${_forwarders_block}\n        ${ip};"
 		fi
-	done <<< "$(echo "$( printenv DNS_FORWARDER )" | sed 's/,/\n/g' )"
+	done <<< "$( printenv DNS_FORWARDER | sed 's/,/\n/g' )"
 
 
 	if [ -z "${_forwarders_block}" ]; then
