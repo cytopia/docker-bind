@@ -1,0 +1,12 @@
+# The labels in this file are automatically synced with the repository
+# using the micnncim/action-label-syncer action.
+---
+- name: C-dependency
+  color: 1abc9c
+  description: "Category: Dependency"
+- name: PR-block
+  color: 3498db
+  description: "Pull Request: Do not merge"
+- name: PR-merge
+  color: 3498db
+  description: "Pull Request: Merge when ready"

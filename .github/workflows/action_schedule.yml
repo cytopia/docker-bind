@@ -1,0 +1,35 @@
+---
+
+# -------------------------------------------------------------------------------------------------
+# Job Name
+# -------------------------------------------------------------------------------------------------
+name: nightly
+
+
+# -------------------------------------------------------------------------------------------------
+# When to run
+# -------------------------------------------------------------------------------------------------
+on:
+  # Runs daily
+  schedule:
+    - cron: '0 0 * * *'
+
+
+jobs:
+
+  # (1/2) Determine repository params
+  params:
+    uses: ./.github/workflows/params.yml
+
+  # (2/2) Build
+  docker:
+    needs: [params]
+    uses: devilbox/github-actions/.github/workflows/docker-name-version-arch.yml@master
+    with:
+      enabled: true
+      can_deploy: true
+      matrix: ${{ needs.params.outputs.matrix }}
+      refs: ${{ needs.params.outputs.refs }}
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
