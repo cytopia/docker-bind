@@ -26,7 +26,7 @@ TAG        = latest
 # Makefile.docker overwrites
 NAME       = Bind
 VERSION    = latest
-IMAGE      = cytopia/docker-bind
+IMAGE      = cytopia/bind
 DIR        = .
 FILE       = Dockerfile
 DOCKER_TAG = $(TAG)
