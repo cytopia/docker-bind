@@ -71,6 +71,7 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
 
 | Variable           | Type   | Default   | Description |
 |--------------------|--------|-----------|-------------|
+| `DEBUG`            | bool   | `0`       | Set to `1` in order to add `set -x` to entrypoint script for bash debugging |
 | `DEBUG_ENTRYPOINT` | bool   | `0`       | Show shell commands executed during start.<br/>Values: `0`, `1` or `2` |
 | `DOCKER_LOGS`      | bool   | `0`       | Set to `1` to log info and queries to Docker logs. |
 | `WILDCARD_DNS`     | string |           | Add one or more tld's, domains or subdomains as catch-all for a specific IP address or CNAME. Reverse DNS is optional and can also be specified. |
