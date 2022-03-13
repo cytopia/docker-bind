@@ -218,18 +218,18 @@ add_options() {
 		echo "    listen-on-v6 { any; };"
 		if [ -n "${forwarders}" ]; then
 			echo "    forwarders {"
-			printf       "%s\n" "${forwarders}"
+			printf       "%s" "${forwarders}"
 			echo "    };"
 		fi
 		if [ -n "${allow_recursion}" ]; then
 			echo "    recursion yes;"
 			echo "    allow-recursion {"
-			printf        "%s\n" "${allow_recursion}"
+			printf        "%s" "${allow_recursion}"
 			echo "    };"
 		fi
 		if [ -n "${allow_query}" ]; then
 			echo "    allow-query {"
-			printf        "%s\n" "${allow_query}"
+			printf        "%s" "${allow_query}"
 		  echo "    };"
 		fi
 		echo "};"
