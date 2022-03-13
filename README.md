@@ -35,7 +35,7 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
         9. [EXPIRY_TIME](#expiry_time)
         10. [MAX_CACHE_TIME](#max_cache_time)
         11. [ALLOW_QUERY](#allow_query)
-        12. [ALLOW_RECURSION](#allow_recursion)        
+        12. [ALLOW_RECURSION](#allow_recursion)
 2. [Default mountpoints](#default-mountpoints)
 3. [Default ports](#default-ports)
 4. [Examples](#examples)
