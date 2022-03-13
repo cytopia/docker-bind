@@ -1,10 +1,18 @@
 # Bind Docker
 
-[![Build Status](https://travis-ci.org/cytopia/docker-bind.svg?branch=master)](https://travis-ci.org/cytopia/docker-bind)
-[![Join the chat at https://gitter.im/devilbox/Lobby](https://badges.gitter.im/devilbox/Lobby.svg)](https://gitter.im/devilbox/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[![lint](https://github.com/cytopia/docker-bind/workflows/lint/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Alint)
+[![build](https://github.com/cytopia/docker-bind/workflows/build/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Abuild)
+[![nightly](https://github.com/cytopia/docker-bind/workflows/nightly/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Anightly)
+
+[![Tag](https://img.shields.io/github/tag/cytopia/docker-bind.svg)](https://github.com/cytopia/docker-bind/releases)
+[![Gitter](https://badges.gitter.im/cytopia/Lobby.svg)](https://gitter.im/cytopia/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Discourse](https://img.shields.io/discourse/https/devilbox.discourse.group/status.svg?colorB=%234CB697)](https://devilbox.discourse.group)
 [![](https://images.microbadger.com/badges/version/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind")
 [![](https://images.microbadger.com/badges/image/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind")
-[![](https://images.microbadger.com/badges/license/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind")
+[![License](https://img.shields.io/badge/license-MIT-%233DA639.svg)](https://opensource.org/licenses/MIT)
+
+**Available Architectures:**  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`
 
 ----
 
@@ -35,7 +43,7 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
         9. [EXPIRY_TIME](#expiry_time)
         10. [MAX_CACHE_TIME](#max_cache_time)
         11. [ALLOW_QUERY](#allow_query)
-        12. [ALLOW_RECURSION](#allow_recursion)        
+        12. [ALLOW_RECURSION](#allow_recursion)
 2. [Default mountpoints](#default-mountpoints)
 3. [Default ports](#default-ports)
 4. [Examples](#examples)

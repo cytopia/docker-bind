@@ -1,17 +1,17 @@
-FROM debian:buster-slim
-MAINTAINER "cytopia" <cytopia@everythingcli.org>
+FROM debian:stable-slim
+LABEL org.opencontainers.image.authors="cytopia@everythingcli.org"
 
 
 ###
 ### Install
 ###
-RUN set -x \
+RUN set -eux \
 	&& apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 		bind9 \
 		dnsutils \
 		iputils-ping \
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps \
+	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
 	&& rm -r /var/lib/apt/lists/* \
 	&& mkdir /var/log/named \
 	&& chown bind:bind /var/log/named \
