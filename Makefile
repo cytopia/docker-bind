@@ -87,8 +87,6 @@ test: update-readme
 
 .PHONY: _test-integration
 _test-integration:
-	@# Run twice to catch more potential errors/race-conditions
-	./tests/start-ci.sh $(IMAGE) $(NAME) $(VERSION) $(DOCKER_TAG) $(ARCH)
 	./tests/start-ci.sh $(IMAGE) $(NAME) $(VERSION) $(DOCKER_TAG) $(ARCH)
 
 .PHONY: update-readme

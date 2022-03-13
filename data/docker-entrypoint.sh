@@ -544,7 +544,7 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 			fi
 			if ! is_ip4 "${tmp}"; then
 				# Try dig command second
-				tmp="$( dig @8.8.8.8 +short "${my_add}" A )"
+				tmp="$( dig @8.8.8.8 +short "${my_add}" A | head -1 )"
 				if ! is_ip4 "${tmp}"; then
 					log "warn" "CNAME '${my_add}' could not be resolved. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
 					continue;
@@ -597,7 +597,7 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; t
 			fi
 			if ! is_ip4 "${tmp}"; then
 				# Try dig command second
-				tmp="$( dig @8.8.8.8 +short "${my_add}" A )"
+				tmp="$( dig @8.8.8.8 +short "${my_add}" A | head -1 )"
 				if ! is_ip4 "${tmp}"; then
 					log "warn" "CNAME '${my_add}' could not be resolved. Skipping to add extra host" "${DEBUG_ENTRYPOINT}"
 					continue;
