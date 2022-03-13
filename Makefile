@@ -34,7 +34,7 @@ ARCH       = linux/amd64
 
 # Makefile.lint overwrites
 FL_IGNORES  = .git/,.github/
-SC_IGNORES  = .git/,.github/
+SC_IGNORES  = .git/,.github/,tests/
 
 
 # -------------------------------------------------------------------------------------------------
