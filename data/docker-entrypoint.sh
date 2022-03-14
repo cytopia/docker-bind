@@ -590,7 +590,7 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
 		if is_cname "${my_add}"; then
 			# Try ping command first
-			if ! tmp="$( ping -c1 -W1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
+			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
 				tmp="${my_add}"
 			fi
 			if ! is_ip4_addr "${tmp}"; then
@@ -651,7 +651,7 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; t
 		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
 		if is_cname "${my_add}"; then
 			# Try ping command first
-			if ! tmp="$( ping -c1 -W1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
+			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
 				tmp="${my_add}"
 			fi
 			if ! is_ip4_addr "${tmp}"; then
