@@ -81,13 +81,14 @@ manifest-push: docker-manifest-push
 # -------------------------------------------------------------------------------------------------
 #  Test Targets
 # -------------------------------------------------------------------------------------------------
+DEBUG = 0
 .PHONY: test
 test: _test-integration
 test: update-readme
 
 .PHONY: _test-integration
 _test-integration:
-	./tests/start-ci.sh $(IMAGE) $(NAME) $(VERSION) $(DOCKER_TAG) $(ARCH)
+	./tests/start-ci.sh $(IMAGE) $(NAME) $(VERSION) $(DOCKER_TAG) $(ARCH) $(DEBUG)
 
 .PHONY: update-readme
 update-readme:
