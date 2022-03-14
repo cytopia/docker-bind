@@ -25,8 +25,15 @@ run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e D
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
-	run "docker stop ${NAME}"
-	exit 1
+	if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+		if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+			echo "FAILED: www.devilbox with TTL time not found"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 docker_stop "${NAME}"
 
@@ -35,10 +42,16 @@ docker_stop "${NAME}"
 run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=1 -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG}"
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
-if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox" "0" "1" | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'; then
-	echo "FAILED: '^www\\.devilbox\\.\\s+500\\s+IN\\s+A' expected, but not found"
-	run "docker stop ${NAME}"
-	exit 1
+if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+	if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+		if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+			echo "FAILED: www.devilbox with TTL time not found"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 docker_stop "${NAME}"
 
@@ -47,10 +60,16 @@ docker_stop "${NAME}"
 run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=0 -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG}"
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
-if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox" "0" "1" | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'; then
-	echo "FAILED: '^www\\.devilbox\\.\\s+500\\s+IN\\s+A' expected, but not found"
-	run "docker stop ${NAME}"
-	exit 1
+if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+	if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+		if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+			echo "FAILED: www.devilbox with TTL time not found"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 docker_stop "${NAME}"
 
@@ -59,9 +78,15 @@ docker_stop "${NAME}"
 run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG}"
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
-if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox" "0" "1" | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'; then
-	echo "FAILED: '^www\\.devilbox\\.\\s+500\\s+IN\\s+A' expected, but not found"
-	run "docker stop ${NAME}"
-	exit 1
+if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+	if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+		if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
+			echo "FAILED: www.devilbox with TTL time not found"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 docker_stop "${NAME}"

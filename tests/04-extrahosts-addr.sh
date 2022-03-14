@@ -25,9 +25,15 @@ run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e D
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
-	echo "FAILED: 1.1.1.1 expected, but not found"
-	run "docker stop ${NAME}"
-	exit 1
+	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
+		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
+			echo "FAILED: www.devilbox is not resolvable to 1.1.1.1"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 if [ "$( dig @127.0.0.1 -p ${PORT} +short t1.devilbox | wc -l )" != "0" ]; then
 	run "docker stop ${NAME}"
@@ -41,9 +47,15 @@ run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e D
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
-	echo "FAILED: 1.1.1.1 expected, but not found"
-	run "docker stop ${NAME}"
-	exit 1
+	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
+		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
+			echo "FAILED: www.devilbox is not resolvable to 1.1.1.1"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 if [ "$( dig @127.0.0.1 -p ${PORT} +short t1.devilbox | wc -l )" != "0" ]; then
 	docker stop "${NAME}"
@@ -57,9 +69,15 @@ run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e D
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
-	echo "FAILED: 1.1.1.1 expected, but not found"
-	run "docker stop ${NAME}"
-	exit 1
+	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
+		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
+			echo "FAILED: www.devilbox is not resolvable to 1.1.1.1"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 if [ "$( dig @127.0.0.1 -p ${PORT} +short t1.devilbox | wc -l )" != "0" ]; then
 	run "docker stop ${NAME}"
@@ -73,9 +91,15 @@ run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e '
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
-	echo "FAILED: 1.1.1.1 expected, but not found"
-	run "docker stop ${NAME}"
-	exit 1
+	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
+		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox" "0" "1" | grep -Eq '^1\.1\.1\.1$'; then
+			echo "FAILED: www.devilbox is not resolvable to 1.1.1.1"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 if [ "$( dig @127.0.0.1 -p ${PORT} +short t1.devilbox | wc -l )" != "0" ]; then
 	run "docker stop ${NAME}"
