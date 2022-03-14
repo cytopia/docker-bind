@@ -48,7 +48,14 @@ else
 		echo "###"
 		echo "########################################################################################################################"
 		echo "########################################################################################################################"
-		sh -c "${i} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH} ${DEBUG}"
+		if ! sh -c "${i} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH} ${DEBUG}"; then
+			if ! sh -c "${i} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH} ${DEBUG}"; then
+				if ! sh -c "${i} ${IMAGE} ${NAME} ${VERSION} ${TAG} ${ARCH} ${DEBUG}"; then
+					echo "Failed after 3 repeats"
+					exit 1
+				fi
+			fi
+		fi
 		printf "\\n\\n"
 	done
 fi
