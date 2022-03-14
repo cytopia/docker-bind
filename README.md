@@ -441,4 +441,4 @@ If you need support, join the Gitter Chat: [![Join the chat at https://gitter.im
 
 **[MIT License](LICENSE.md)**
 
-Copyright (c) 2016 [cytopia](https://github.com/cytopia)
+Copyright (c) 2022 [cytopia](https://github.com/cytopia)
