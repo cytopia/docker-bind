@@ -13,13 +13,14 @@ IMAGE="${1}"
 #VERSION="${3}"
 TAG="${4}"
 ARCH="${5}"
+DEBUG="${6}"
 
 NAME="bind$( shuf -i 1000000000-2000000000 -n 1 )"
 PORT="5300"
 
 
 # DEBUG_ENTRYPOINT=2
-run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=1 -e DEBUG_ENTRYPOINT=2 -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
+run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=2 -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
 run "sleep 5"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
@@ -30,7 +31,7 @@ run "docker stop ${NAME}"
 
 
 # DEBUG_ENTRYPOINT=1
-run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=1 -e DEBUG_ENTRYPOINT=1 -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
+run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=1 -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
 run "sleep 5"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
@@ -41,7 +42,7 @@ run "docker stop ${NAME}"
 
 
 # DEBUG_ENTRYPOINT=0
-run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=1 -e DEBUG_ENTRYPOINT=0 -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
+run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=0 -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
 run "sleep 5"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
@@ -52,7 +53,7 @@ run "docker stop ${NAME}"
 
 
 # DEBUG_ENTRYPOINT=null
-run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=1 -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
+run "docker run --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e 'EXTRA_HOSTS=www.devilbox=google.com' -e TTL_TIME=500 -p ${PORT}:53/udp ${IMAGE}:${TAG} &"
 run "sleep 5"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then

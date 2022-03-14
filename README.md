@@ -12,7 +12,7 @@
 [![](https://images.microbadger.com/badges/image/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind")
 [![License](https://img.shields.io/badge/license-MIT-%233DA639.svg)](https://opensource.org/licenses/MIT)
 
-**Available Architectures:**  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`
+**Available Architectures:**  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`, `ppc64le`, `s390x`
 
 ----
 
@@ -434,11 +434,39 @@ have entries in `/etc/resolv.conf`.
 
 ## Support
 
-If you need support, join the Gitter Chat: [![Join the chat at https://gitter.im/devilbox/Lobby](https://badges.gitter.im/devilbox/Lobby.svg)](https://gitter.im/devilbox/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Get support here
+
+<table width="100%" style="width:100%; display:table;">
+ <thead>
+  <tr>
+   <th width="25%" style="width:25%;"><h3><a target="_blank" href="https://gitter.im/devilbox/Lobby">Chat</a></h3></th>
+   <th width="25%" style="width:25%;"><h3><a target="_blank" href="https://devilbox.discourse.group">Forum</a></h3></th>
+  </tr>
+ </thead>
+ <tbody style="vertical-align: middle; text-align: center;">
+  <tr>
+   <td>
+    <a target="_blank" href="https://gitter.im/devilbox/Lobby">
+     <img title="Chat on Gitter" width="100" style="width:100px;" name="Chat on Gitter" src="https://raw.githubusercontent.com/cytopia/icons/master/400x400/gitter.png" />
+    </a>
+   </td>
+   <td>
+    <a target="_blank" href="https://devilbox.discourse.group">
+     <img title="Devilbox Forums" width="100" style="width:100px;" name="Forum" src="https://raw.githubusercontent.com/cytopia/icons/master/400x400/discourse.png" />
+    </a>
+   </td>
+  </tr>
+  <tr>
+  <td><a target="_blank" href="https://gitter.im/devilbox/Lobby">gitter.im/devilbox</a></td>
+  <td><a target="_blank" href="https://devilbox.discourse.group">devilbox.discourse.group</a></td>
+  </tr>
+ </tbody>
+</table>
+
 
 
 ## License
 
 **[MIT License](LICENSE.md)**
 
-Copyright (c) 2016 [cytopia](https://github.com/cytopia)
+Copyright (c) 2022 [cytopia](https://github.com/cytopia)

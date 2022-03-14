@@ -4,15 +4,17 @@ set -e
 set -u
 set -o pipefail
 
-# Enable debug of entrypoint
+# Enable bash debugging for this entrypoint script
 if [ "${DEBUG:-}" = "1" ]; then
 	set -x
 fi
 
 
-#################################################################################
-# VARIABLES
-#################################################################################
+####################################################################################################
+###
+### (1/5) VARIABLES
+###
+####################################################################################################
 
 ###
 ### Variables
@@ -42,9 +44,11 @@ DEFAULT_MAX_CACHE_TIME=10800
 
 
 
-#################################################################################
-# HELPER FUNCTIONS
-#################################################################################
+####################################################################################################
+###
+### (2/5) HELPER FUNCTIONS
+###
+####################################################################################################
 
 ###
 ### Log to stdout/stderr
@@ -79,6 +83,19 @@ log() {
 
 
 ###
+### Log configuration file
+###
+log_file() {
+	local filename="${1}"
+
+	printf "%0.s-" {1..80}; echo
+	echo "${filename}"
+	printf "%0.s-" {1..80}; echo
+	cat "${filename}"
+}
+
+
+###
 ### Wrapper for run_run command
 ###
 run() {
@@ -105,11 +122,25 @@ is_int() {
 
 
 ###
+### Check if a value has multiple lines
+###
+is_multiline() {
+	(( $(grep -c . <<<"${1}") > 1 ))
+}
+
+
+###
 ### Check if a value is a valid IP address
 ###
-is_ip4() {
-	# IP is not in correct format
-	if ! echo "${1}" | grep -Eq '^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$'; then
+is_ip4_addr() {
+	local regex='^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$'
+
+	# Invalid input
+	if is_multiline "${1}"; then
+		return 1
+	fi
+	# Invalid IPv4
+	if ! echo "${1}" | grep -Eq "${regex}"; then
 		return 1
 	fi
 
@@ -133,37 +164,54 @@ is_ip4() {
 		[ "${o4}" -gt "255" ]; then
 		return 1
 	fi
-	# All tests passed
-	return 0
 }
+
 
 ###
 ### Check if a value is a valid IPv4 address with CIDR mask
 ###
-is_ipv4_with_mask() {
-	local string="${1}"
-
+is_ipv4_cidr() {
 	# http://blog.markhatton.co.uk/2011/03/15/regular-expressions-for-ip-addresses-cidr-ranges-and-hostnames/
-	if ! echo "${1}" | grep -Eq '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(3[0-2]|[1-2][0-9]|[0-9]))$'; then
+	local regex='^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(3[0-2]|[1-2][0-9]|[0-9]))$'
+
+	# Invalid input
+	if is_multiline "${1}"; then
 		return 1
 	fi
-
-	# All tests passed
-	return 0
+	# Invalid IPv4 CIDR
+	if ! echo "${1}" | grep -Eq "${regex}"; then
+		return 1
+	fi
 }
+
 
 ###
 ### Check if a value is a valid IPv4 address or IPv4 address with CIDR mask
 ###
-is_ipv4_or_mask() {
+is_ipv4_addr_or_ipv4_cidr() {
 	# Is IPv4 or IPv4 with mask
-	if is_ip4 "${1}" || is_ipv4_with_mask "${1}"; then
+	if is_ip4_addr "${1}" || is_ipv4_cidr "${1}"; then
 		return 0
 	fi
-
-	# Failure
-	return 1
 }
+
+
+###
+### Check if a value is a valid cname
+###
+is_cname() {
+	# https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
+	local regex='^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+
+	# Is an IP already
+	if is_ip4_addr "${1}" || is_ipv4_cidr "${1}"; then
+		return 1
+	fi
+
+	# Match for valid CNAME
+	echo "${1}" | grep -Eq "${regex}"
+}
+
 
 ###
 ### Check if a value matches any of four predefined address match list names
@@ -178,28 +226,13 @@ is_address_match_list() {
 	return 1
 }
 
+
+
+####################################################################################################
 ###
-### Check if a value is a valid cname
+### (3/5) ACTION FUNCTIONS
 ###
-is_cname() {
-	local string="${1}"
-	# https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-	local regex='^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
-
-	# Is an IP already
-	if is_ip4 "${string}"; then
-		return 1
-	fi
-
-	# Match for valid CNAME
-	echo "${string}" | grep -Eq "${regex}"
-}
-
-
-
-#################################################################################
-# ACTION FUNCTIONS
-#################################################################################
+####################################################################################################
 
 # Add Bind options with or without forwarder
 #
@@ -239,6 +272,9 @@ add_options() {
 		fi
 		echo "};"
 	} > "${config_file}"
+
+	# Output configuration file
+	log_file "${config_file}"
 }
 
 
@@ -316,6 +352,9 @@ add_wildcard_zone() {
 		fi
 	} > "${conf_file}"
 
+	# Output configuration file
+	log_file "${conf_file}"
+
 	# Forward Zone
 	{
 		echo "\$TTL  ${ttl_time}"
@@ -337,6 +376,9 @@ add_wildcard_zone() {
 		fi
 	} > "${zone_file}"
 
+	# Output configuration file
+	log_file "${zone_file}"
+
 	# Reverse Zone
 	if [ -n "${reverse}" ]; then
 		{
@@ -352,6 +394,9 @@ add_wildcard_zone() {
 			echo "${reverse_addr}.in-addr.arpa.       IN      NS      ns2.${domain}."
 			echo "${reverse_octet}.${reverse_addr}.in-addr.arpa.     IN      PTR      ${reverse}."
 		} > "${zone_rev_file}"
+
+		# Output configuration file
+		log_file "${zone_rev_file}"
 	fi
 
 	# named.conf
@@ -384,9 +429,11 @@ add_wildcard_zone() {
 
 
 
-#################################################################################
-## BOOTSTRAP
-#################################################################################
+####################################################################################################
+###
+### (4/5) BOOTSTRAP
+###
+####################################################################################################
 
 ###
 ### Set Debug level
@@ -412,9 +459,11 @@ log "info" "Debug level: ${DEBUG_ENTRYPOINT}" "${DEBUG_ENTRYPOINT}"
 
 
 
-#################################################################################
-# ENTRYPOINT
-#################################################################################
+####################################################################################################
+###
+### (5/5) ENTRYPOINT
+###
+####################################################################################################
 
 ###
 ### Re-create BIND default config
@@ -443,6 +492,9 @@ if printenv DOCKER_LOGS >/dev/null 2>&1; then
 			echo "};"
 		} > "${NAMED_LOG_CONF}"
 		log "info" "BIND logging: to stderr via Docker logs" "${DEBUG_ENTRYPOINT}"
+
+		# Output configuration file
+		log_file "${NAMED_LOG_CONF}"
 	elif [ "${DOCKER_LOGS}" = "0" ]; then
 		log "info" "BIND logging: disabled explicitly" "${DEBUG_ENTRYPOINT}"
 	else
@@ -521,7 +573,6 @@ else
 fi
 
 
-
 ###
 ### Add wildcard DNS
 ###
@@ -542,10 +593,10 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
 				tmp="${my_add}"
 			fi
-			if ! is_ip4 "${tmp}"; then
+			if ! is_ip4_addr "${tmp}"; then
 				# Try dig command second
 				tmp="$( dig @8.8.8.8 +short "${my_add}" A | head -1 )"
-				if ! is_ip4 "${tmp}"; then
+				if ! is_ip4_addr "${tmp}"; then
 					log "warn" "CNAME '${my_add}' could not be resolved. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
 					continue;
 				fi
@@ -555,7 +606,7 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 		fi
 
 		# If specified address is not a valid IPv4 address, skip it
-		if ! is_ip4 "${my_add}"; then
+		if ! is_ip4_addr "${my_add}"; then
 			log "warn" "Invalid IP address '${my_add}': for *.${my_dom} -> ${my_add}. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
 			continue;
 		fi
@@ -567,12 +618,20 @@ if printenv WILDCARD_DNS >/dev/null 2>&1; then
 		fi
 
 		echo "include \"${my_cfg}\";" >> "${NAMED_CONF}"
-		add_wildcard_zone "${my_dom}" "${my_add}" "${my_cfg}" "1" "${my_rev}" \
-			"${TTL_TIME}" "${REFRESH_TIME}" "${RETRY_TIME}" "${EXPIRY_TIME}" "${MAX_CACHE_TIME}" \
+		add_wildcard_zone \
+			"${my_dom}" \
+			"${my_add}" \
+			"${my_cfg}" \
+			"1" \
+			"${my_rev}" \
+			"${TTL_TIME}" \
+			"${REFRESH_TIME}" \
+			"${RETRY_TIME}" \
+			"${EXPIRY_TIME}" \
+			"${MAX_CACHE_TIME}" \
 			"${DEBUG_ENTRYPOINT}"
 	done
 fi
-
 
 
 ###
@@ -595,10 +654,10 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; t
 			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
 				tmp="${my_add}"
 			fi
-			if ! is_ip4 "${tmp}"; then
+			if ! is_ip4_addr "${tmp}"; then
 				# Try dig command second
 				tmp="$( dig @8.8.8.8 +short "${my_add}" A | head -1 )"
-				if ! is_ip4 "${tmp}"; then
+				if ! is_ip4_addr "${tmp}"; then
 					log "warn" "CNAME '${my_add}' could not be resolved. Skipping to add extra host" "${DEBUG_ENTRYPOINT}"
 					continue;
 				fi
@@ -608,7 +667,7 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; t
 		fi
 
 		# If specified address is not a valid IPv4 address, skip it
-		if ! is_ip4 "${my_add}"; then
+		if ! is_ip4_addr "${my_add}"; then
 			log "warn" "Invalid IP address '${my_add}': for ${my_dom} -> ${my_add}. Skipping to add extra host" "${DEBUG_ENTRYPOINT}"
 			continue;
 		fi
@@ -620,14 +679,22 @@ if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; t
 		fi
 
 		echo "include \"${my_cfg}\";" >> "${NAMED_CONF}"
-		add_wildcard_zone "${my_dom}" "${my_add}" "${my_cfg}" "0" "${my_rev}" \
-			"${TTL_TIME}" "${REFRESH_TIME}" "${RETRY_TIME}" "${EXPIRY_TIME}" "${MAX_CACHE_TIME}" \
+		add_wildcard_zone \
+			"${my_dom}" \
+			"${my_add}" \
+			"${my_cfg}" \
+			"0" \
+			"${my_rev}" \
+			"${TTL_TIME}" \
+			"${REFRESH_TIME}" \
+			"${RETRY_TIME}" \
+			"${EXPIRY_TIME}" \
+			"${MAX_CACHE_TIME}" \
 			"${DEBUG_ENTRYPOINT}"
 	done
 else
 	log "info" "Not adding any extra hosts" "${DEBUG_ENTRYPOINT}"
 fi
-
 
 
 ###
@@ -644,7 +711,7 @@ else
 	while read -r ip ; do
 		ip="$( echo "${ip}" | xargs -0 )"
 
-		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
+		if ! is_ipv4_addr_or_ipv4_cidr "${ip}" && ! is_address_match_list "${ip}"; then
 			log "err" "ALLOW_QUERY error: not a valid IPv4 address with optional mask: ${ip}" "${DEBUG_ENTRYPOINT}"
 			exit 1
 		fi
@@ -669,7 +736,6 @@ else
 fi
 
 
-
 ###
 ### Allow recursion
 ###
@@ -684,7 +750,7 @@ else
 	while read -r ip ; do
 		ip="$( echo "${ip}" | xargs -0 )"
 
-		if ! is_ipv4_or_mask "${ip}" && ! is_address_match_list "${ip}"; then
+		if ! is_ipv4_addr_or_ipv4_cidr "${ip}" && ! is_address_match_list "${ip}"; then
 			log "err" "ALLOW_RECURSION error: not a valid IPv4 address with optional mask: ${ip}" "${DEBUG_ENTRYPOINT}"
 			exit 1
 		fi
@@ -709,7 +775,6 @@ else
 fi
 
 
-
 ###
 ### DNSSEC validation
 ###
@@ -731,7 +796,6 @@ fi
 log "info" "DNSSEC Validation: ${DNSSEC_VALIDATE}" "${DEBUG_ENTRYPOINT}"
 
 
-
 ###
 ### Forwarder
 ###
@@ -739,7 +803,12 @@ if ! printenv DNS_FORWARDER >/dev/null 2>&1; then
 	log "info" "\$DNS_FORWARDER not set." "${DEBUG_ENTRYPOINT}"
 	log "info" "No custom DNS server will be used as forwarder" "${DEBUG_ENTRYPOINT}"
 
-	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" "" "${_allow_query_block}" "${_allow_recursion_block}"
+	add_options \
+		"${NAMED_OPT_CONF}" \
+		"${DNSSEC_VALIDATE}" \
+		"" \
+		"${_allow_query_block}" \
+		"${_allow_recursion_block}"
 else
 
 	# To be pupulated
@@ -751,7 +820,7 @@ else
 	while read -r ip ; do
 		ip="$( echo "${ip}" | xargs -0 )"
 
-		if ! is_ip4 "${ip}"; then
+		if ! is_ip4_addr "${ip}"; then
 			log "err" "DNS_FORWARDER error: not a valid IP address: ${ip}" "${DEBUG_ENTRYPOINT}"
 			exit 1
 		fi
@@ -763,15 +832,20 @@ else
 		fi
 	done <<< "$( printenv DNS_FORWARDER | sed 's/,/\n/g' )"
 
-
 	if [ -z "${_forwarders_block}" ]; then
 		log "err" "DNS_FORWARDER error: variable specified, but no IP addresses found." "${DEBUG_ENTRYPOINT}"
 		exit 1
 	fi
 
 	log "info" "Adding custom DNS forwarder: ${DNS_FORWARDER}" "${DEBUG_ENTRYPOINT}"
-	add_options "${NAMED_OPT_CONF}" "${DNSSEC_VALIDATE}" "${_forwarders_block}" "${_allow_query_block}" "${_allow_recursion_block}"
+	add_options \
+		"${NAMED_OPT_CONF}" \
+		"${DNSSEC_VALIDATE}" \
+		"${_forwarders_block}" \
+		"${_allow_query_block}" \
+		"${_allow_recursion_block}"
 fi
+
 
 ###
 ### Start
