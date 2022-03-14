@@ -28,6 +28,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+5
 	if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
 			echo "FAILED: www.devilbox with TTL time not found"
+			run "dig @127.0.0.1 -p ${PORT} www.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
@@ -46,6 +47,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+5
 	if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
 			echo "FAILED: www.devilbox with TTL time not found"
+			run "dig @127.0.0.1 -p ${PORT} www.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
@@ -64,6 +66,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+5
 	if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
 			echo "FAILED: www.devilbox with TTL time not found"
+			run "dig @127.0.0.1 -p ${PORT} www.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
@@ -82,6 +85,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+5
 	if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} www.devilbox | grep -E '^www\.devilbox\.\s+500\s+IN\s+A'"; then
 			echo "FAILED: www.devilbox with TTL time not found"
+			run "dig @127.0.0.1 -p ${PORT} www.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."

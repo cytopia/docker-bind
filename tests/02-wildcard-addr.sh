@@ -28,6 +28,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"
 	if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"; then
 			echo "FAILED: t1.devilbox is not resolvable to 1.1.1.1"
+			run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
@@ -46,6 +47,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"
 	if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"; then
 			echo "FAILED: t1.devilbox is not resolvable to 1.1.1.1"
+			run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
@@ -64,6 +66,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"
 	if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"; then
 			echo "FAILED: t1.devilbox is not resolvable to 1.1.1.1"
+			run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
@@ -82,6 +85,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"
 	if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox | grep -E '^1\.1\.1\.1$'"; then
 			echo "FAILED: t1.devilbox is not resolvable to 1.1.1.1"
+			run "dig @127.0.0.1 -p ${PORT} +short t1.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."

@@ -28,6 +28,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9
 	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
 			echo "FAILED: www.devilbox is not resolvable"
+			run "dig @127.0.0.1 -p ${PORT} +short www.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
@@ -46,6 +47,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9
 	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
 			echo "FAILED: www.devilbox is not resolvable"
+			run "dig @127.0.0.1 -p ${PORT} +short www.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
@@ -64,6 +66,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9
 	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
 			echo "FAILED: www.devilbox is not resolvable"
+			run "dig @127.0.0.1 -p ${PORT} +short www.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
@@ -82,6 +85,7 @@ if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9
 	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
 		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
 			echo "FAILED: www.devilbox is not resolvable"
+			run "dig @127.0.0.1 -p ${PORT} +short www.devilbox"
 			run "docker logs ${NAME}"
 			run "docker stop ${NAME}"
 			echo "ABORT..."
