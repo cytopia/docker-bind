@@ -25,11 +25,15 @@ run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e D
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
-	echo "FAILED: www.devilbox is not resolvable"
-	run "docker logs ${NAME}"
-	run "docker stop ${NAME}"
-	echo "ABORT..."
-	exit 1
+	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
+		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
+			echo "FAILED: www.devilbox is not resolvable"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 docker_stop "${NAME}"
 
@@ -39,11 +43,15 @@ run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e D
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
-	echo "FAILED: www.devilbox is not resolvable"
-	run "docker logs ${NAME}"
-	run "docker stop ${NAME}"
-	echo "ABORT..."
-	exit 1
+	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
+		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
+			echo "FAILED: www.devilbox is not resolvable"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 docker_stop "${NAME}"
 
@@ -53,11 +61,15 @@ run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e D
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
-	echo "FAILED: www.devilbox is not resolvable"
-	run "docker logs ${NAME}"
-	run "docker stop ${NAME}"
-	echo "ABORT..."
-	exit 1
+	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
+		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
+			echo "FAILED: www.devilbox is not resolvable"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 docker_stop "${NAME}"
 
@@ -67,10 +79,14 @@ run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e '
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
-	echo "FAILED: www.devilbox is not resolvable"
-	run "docker logs ${NAME}"
-	run "docker stop ${NAME}"
-	echo "ABORT..."
-	exit 1
+	if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
+		if ! run "dig @127.0.0.1 -p ${PORT} +short www.devilbox | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'"; then
+			echo "FAILED: www.devilbox is not resolvable"
+			run "docker logs ${NAME}"
+			run "docker stop ${NAME}"
+			echo "ABORT..."
+			exit 1
+		fi
+	fi
 fi
 docker_stop "${NAME}"
