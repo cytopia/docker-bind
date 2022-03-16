@@ -24,7 +24,8 @@ jobs:
   # (2/2) Build
   docker:
     needs: [params]
-    uses: devilbox/github-actions/.github/workflows/docker-name-version-arch.yml@master
+    #uses: devilbox/github-actions/.github/workflows/docker-name-version-arch.yml@master
+    uses: ./.github/workflows/docker-name-version-arch.yml
     with:
       enabled: true
       can_deploy: false

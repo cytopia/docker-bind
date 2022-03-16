@@ -19,4 +19,5 @@ on:
 # -------------------------------------------------------------------------------------------------
 jobs:
   lint:
-    uses: devilbox/github-actions/.github/workflows/lint-generic.yml@master
+    #uses: devilbox/github-actions/.github/workflows/lint-generic.yml@master
+    uses: ./.github/workflows/lint-generic.yml
