@@ -12,7 +12,7 @@ fi
 
 ####################################################################################################
 ###
-### (1/5) VARIABLES
+### (1/6) VARIABLES
 ###
 ####################################################################################################
 
@@ -24,6 +24,28 @@ NAMED_DIR="/etc/bind"
 NAMED_CONF="${NAMED_DIR}/named.conf"
 NAMED_OPT_CONF="${NAMED_DIR}/named.conf.options"
 NAMED_LOG_CONF="${NAMED_DIR}/named.conf.logging"
+NAMED_CUST_CONF="${NAMED_DIR}/custom/conf"
+NAMED_CUST_ZONE="${NAMED_DIR}/custom/zone"
+
+mkdir -p "${NAMED_CUST_CONF}"
+mkdir -p "${NAMED_CUST_ZONE}"
+
+
+###
+### FQDN of primary nameserver.
+### Defaults to current hostname if not otherwise specified.
+### When overwriting, use an FQDN by which this container is reachable.
+### http://rscott.org/dns/soa.html
+###
+DEFAULT_MNAME="$( hostname -A | sed 's/\s$//g' | xargs -0 )"
+
+
+###
+### Contact Email
+### All dot characters '.' must be escaped with an backslash '\'
+### The actual @ character must be an unescaped dot character '.'
+###
+DEFAULT_RNAME="admin.${DEFAULT_MNAME}"
 
 
 ###
@@ -46,7 +68,7 @@ DEFAULT_MAX_CACHE_TIME=10800
 
 ####################################################################################################
 ###
-### (2/5) HELPER FUNCTIONS
+### (2/6) HELPER FUNCTIONS
 ###
 ####################################################################################################
 
@@ -88,10 +110,12 @@ log() {
 log_file() {
 	local filename="${1}"
 
+	echo
 	printf "%0.s-" {1..80}; echo
 	echo "${filename}"
 	printf "%0.s-" {1..80}; echo
 	cat "${filename}"
+	printf "%0.s^" {1..80}; echo
 }
 
 
@@ -230,7 +254,7 @@ is_address_match_list() {
 
 ####################################################################################################
 ###
-### (3/5) ACTION FUNCTIONS
+### (3/6) ACTION FUNCTIONS
 ###
 ####################################################################################################
 
@@ -247,6 +271,7 @@ add_options() {
 	local forwarders="${3}"
 	local allow_query="${4}"
 	local allow_recursion="${5}"
+	local response_policy="${6}"
 
 	{
 		echo "options {"
@@ -254,6 +279,9 @@ add_options() {
 		echo "    dnssec-validation ${dnssec_validate};"
 		echo "    auth-nxdomain no;    # conform to RFC1035"
 		echo "    listen-on-v6 { any; };"
+		if [ -n "${response_policy}" ]; then
+			echo "    response-policy { zone \"${response_policy}\"; };"
+		fi
 		if [ -n "${forwarders}" ]; then
 			echo "    forwarders {"
 			printf       "%s" "${forwarders}"
@@ -278,150 +306,180 @@ add_options() {
 }
 
 
-# Add wildcard DNS zone.
-#
-# @param domain       Domain name to create zone for.
-# @param address      IP address to point all records to.
-# @param config_file  Configuration file path.
-# @param wildcard     1: Enable wildcard, 0: Normal host
-# @param reverse      String of reverse DNS name or empty for no reverse DNS
-# @param debug_level
-add_wildcard_zone() {
-	# DNS setting variables
-	local domain="${1}"
-	local address="${2}"
-	local conf_file="${3}"
-	local wildcard="${4}"
-	local reverse="${5}"
-	# DNS time variables
-	local ttl_time="${6}"
-	local refresh_time="${7}"
-	local retry_time="${8}"
-	local expiry_time="${9}"
-	local max_cache_time="${10}"
-	# Debug level for log function
-	local debug_level="${11}"
+###
+### Add Reverse zone
+###
+add_rev_zone() {
+	# Zone variables
+	local addr="${1}"  # A.B.C.D
+	local name="${2}"  # Domain / FQDN
+	local zone="${3}"  # C.B.A.in-addr.arpa
+	local ptr="${4}"   # D.C.B.A.in-addr.arpa
 
-
-	local reverse_addr
-	local reverse_octet
-	local conf_path
-	local zone_file
-	local zone_rev_file
+	# DNS timing variables
+	local ttl_time="${5}"
+	local refresh_time="${6}"
+	local retry_time="${7}"
+	local expiry_time="${8}"
+	local max_cache_time="${9}"
 	local serial
-
-	# IP address octets
-	local o1
-	local o2
-	local o3
-	local o4
-
-	# Extract IP address octets
-	o1="$( echo "${address}" | awk -F '.' '{print $1}' )"
-	o2="$( echo "${address}" | awk -F '.' '{print $2}' )"
-	o3="$( echo "${address}" | awk -F '.' '{print $3}' )"
-	o4="$( echo "${address}" | awk -F '.' '{print $4}' )"
-
-	reverse_addr="${o3}.${o2}.${o1}"
-	reverse_octet="${o4}"
-	conf_path="$( dirname "${conf_file}" )"
-	zone_file="${conf_file}.zone"
-	zone_rev_file="${conf_file}.zone.reverse"
 	serial="$( date +'%s' )"
 
-	# Create config directory if it does not yet exist
-	if [ ! -d "${conf_path}" ]; then
-		mkdir -p "${conf_path}"
-	fi
+	local debug_level="${10}"
 
-	# Config
-	{
-		echo "zone \"${domain}\" IN {"
-		echo "    type master;"
-		echo "    allow-transfer { any; };"
-		echo "    allow-update { any; };"
-		echo "    file \"${zone_file}\";"
-		echo "};"
-		if [ -n "${reverse}" ]; then
-			echo "zone \"${reverse_addr}.in-addr.arpa\" {"
+	# Config file
+	if [ ! -f "${NAMED_CUST_CONF}/${zone}.conf" ]; then
+		{
+			echo "zone \"${zone}\" {"
 			echo "    type master;"
 			echo "    allow-transfer { any; };"
 			echo "    allow-update { any; };"
-			echo "    file \"${zone_rev_file}\";"
+			echo "    file \"${NAMED_CUST_ZONE}/${zone}\";"
 			echo "};"
-		fi
-	} > "${conf_file}"
+		} > "${NAMED_CUST_CONF}/${zone}.conf"
 
-	# Output configuration file
-	log_file "${conf_file}"
+		# Append config to bind
+		echo "include \"${NAMED_CUST_CONF}/${zone}.conf\";" >> "${NAMED_CONF}"
+	fi
 
-	# Forward Zone
-	{
-		echo "\$TTL  ${ttl_time}"
-		echo "@      IN SOA  ${domain}. root.${domain}. ("
-		echo "                 ${serial}           ; Serial number of zone file"
-		echo "                 ${refresh_time}     ; Refresh time"
-		echo "                 ${retry_time}       ; Retry time in case of problem"
-		echo "                 ${expiry_time}      ; Expiry time"
-		echo "                 ${max_cache_time} ) ; Maximum caching time in case of failed lookups"
-		echo ";"
-		echo "       IN NS     ns1.${domain}."
-		echo "       IN NS     ns2.${domain}."
-		echo "       IN A      ${address}"
-		echo ";"
-		echo "ns1    IN A      ${address}"
-		echo "ns2    IN A      ${address}"
-		if [ "${wildcard}" -eq "1" ]; then
-			echo "*      IN A      ${address}"
-		fi
-	} > "${zone_file}"
-
-	# Output configuration file
-	log_file "${zone_file}"
-
-	# Reverse Zone
-	if [ -n "${reverse}" ]; then
+	# Reverse zone file
+	if [ ! -f "${NAMED_CUST_ZONE}/${zone}" ]; then
 		{
-			echo "\$TTL  ${ttl_time}"
-			echo "${reverse_addr}.in-addr.arpa.  IN SOA  ${domain}. root.${domain}. ("
-			echo "                 ${serial} ; Serial number of zone file (yyyymmdd##)"
-			echo "                 ${refresh_time}     ; Refresh time"
-			echo "                 ${retry_time}       ; Retry time in case of problem"
-			echo "                 ${expiry_time}      ; Expiry time"
-			echo "                 ${max_cache_time} ) ; Maximum caching time in case of failed lookups"
-			echo ";"
-			echo "${reverse_addr}.in-addr.arpa.       IN      NS      ns1.${domain}."
-			echo "${reverse_addr}.in-addr.arpa.       IN      NS      ns2.${domain}."
-			echo "${reverse_octet}.${reverse_addr}.in-addr.arpa.     IN      PTR      ${reverse}."
-		} > "${zone_rev_file}"
+			printf "\$TTL %s\n" "${ttl_time}"
+			printf "%-29s   IN   SOA     %s %s (\n"    "@" "${DEFAULT_MNAME}." "${DEFAULT_RNAME}."
+			printf "%-44s %-15s; Serial number\n"      ""  "${serial}"
+			printf "%-44s %-15s; Refresh time\n"       ""  "${refresh_time}"
+			printf "%-44s %-15s; Retry time\n"         ""  "${retry_time}"
+			printf "%-44s %-15s; Expiry time\n"        ""  "${expiry_time}"
+			printf "%-44s %-15s; Negative Cache TTL\n" ""  "${max_cache_time}"
+			echo ")"
+			echo
+			echo "; NS Records"
+			printf "%-29s   IN   NS      %-20s\n"    "${zone}." "${DEFAULT_MNAME}."
+			echo
+			echo "; PTR Records"
+			printf "%-29s   IN   PTR     %-20s %s\n" "${ptr}." "${name}." "; ${addr}"
 
-		# Output configuration file
-		log_file "${zone_rev_file}"
+		} > "${NAMED_CUST_ZONE}/${zone}"
+	else
+		{
+			printf "%-29s   IN   PTR     %-20s %s\n" "${ptr}." "${name}." "; ${addr}"
+		} >> "${NAMED_CUST_ZONE}/${zone}"
 	fi
 
-	# named.conf
-	if ! output="$( named-checkconf "${conf_file}" 2>&1 )"; then
+	# Validate .conf file
+	if ! output="$( named-checkconf "${NAMED_CUST_CONF}/${zone}.conf" 2>&1 )"; then
 		log "err" "Configuration failed." "${debug_level}"
-		echo "${output}"
-		exit
-	elif [ "${debug_level}" -gt "1" ]; then
-		echo "${output}"
-	fi
-	# Zone file
-	if ! output="$( named-checkzone "${domain}" "${zone_file}" 2>&1 )"; then
-		log "err" "Configuration failed." "${debug_level}"
-		echo "${output}"
-		exit
-	elif [ "${debug_level}" -gt "1" ]; then
-		echo "${output}"
-	fi
-	# Reverse DNS
-	if [ -n "${reverse}" ]; then
-		if ! output="$( named-checkzone "${reverse_addr}.in-addr.arpa" "${zone_rev_file}" 2>&1 )"; then
-			log "err" "Configuration failed." "${debug_level}"
+		if [ -n "${output}" ]; then
 			echo "${output}"
-			exit
-		elif [ "${debug_level}" -gt "1" ]; then
+		fi
+		log_file "${NAMED_CUST_CONF}/${zone}.conf"
+		exit 1
+	elif [ "${debug_level}" -gt "1" ]; then
+		if [ -n "${output}" ]; then
+			echo "${output}"
+		fi
+	fi
+	# Validate reverze zone file
+	if ! output="$( named-checkzone "${zone}" "${NAMED_CUST_ZONE}/${zone}" 2>&1 )"; then
+		log "err" "Configuration failed." "${debug_level}"
+		if [ -n "${output}" ]; then
+			echo "${output}"
+		fi
+		log_file "${NAMED_CUST_ZONE}/${zone}"
+		exit 1
+	elif [ "${debug_level}" -gt "1" ]; then
+		if [ -n "${output}" ]; then
+			echo "${output}"
+		fi
+	fi
+}
+
+
+###
+### Add Forward zone (response policy zone)
+###
+add_fwd_zone() {
+	# Zone variables
+	local domain="${1}"  # The domain to translate
+	local record="${2}"  # The record type (A, CNAME, etc)
+	local target="${3}"  # The target to translate domain to
+
+	# DNS timing variables
+	local ttl_time="${4}"
+	local refresh_time="${5}"
+	local retry_time="${6}"
+	local expiry_time="${7}"
+	local max_cache_time="${8}"
+	local serial
+	serial="$( date +'%s' )"
+
+	local debug_level="${9}"
+
+	# Config file
+	if [ ! -f "${NAMED_CUST_CONF}/rpz.conf" ]; then
+		{
+			echo "zone \"rpz\" IN {"
+			echo "    type master;"
+			echo "    allow-transfer { any; };"
+			echo "    allow-update { any; };"
+			echo "    file \"${NAMED_CUST_ZONE}/rpz\";"
+			echo "};"
+		} > "${NAMED_CUST_CONF}/rpz.conf"
+
+		# Append config to bind
+		echo "include \"${NAMED_CUST_CONF}/rpz.conf\";" >> "${NAMED_CONF}"
+	fi
+
+	# forward zone file
+	if [ ! -f "${NAMED_CUST_ZONE}/rpz" ]; then
+		{
+			#printf "\$ORIGIN %s\n" "${DEFAULT_MNAME}"
+			printf "\$TTL %s\n" "${ttl_time}"
+			printf "%-29s   IN   SOA     %s %s (\n"    "@" "${DEFAULT_MNAME}." "${DEFAULT_RNAME}."
+			printf "%-44s %-15s; Serial number\n"      ""  "${serial}"
+			printf "%-44s %-15s; Refresh time\n"       ""  "${refresh_time}"
+			printf "%-44s %-15s; Retry time\n"         ""  "${retry_time}"
+			printf "%-44s %-15s; Expiry time\n"        ""  "${expiry_time}"
+			printf "%-44s %-15s; Negative Cache TTL\n" ""  "${max_cache_time}"
+			echo ")"
+			echo
+			echo "; NS Records"
+			printf "%-29s   IN   %-7s %s\n" ""          "NS"        "${DEFAULT_MNAME}."
+			echo
+			echo "; Custom Records"
+			printf "%-29s   IN   %-7s %s\n" "${domain}" "${record}" "${target}"
+		} > "${NAMED_CUST_ZONE}/rpz"
+	else
+		{
+			printf "%-29s   IN   %-7s %s\n" "${domain}" "${record}" "${target}"
+		} >> "${NAMED_CUST_ZONE}/rpz"
+	fi
+
+	# Validate .conf file
+	if ! output="$( named-checkconf "${NAMED_CUST_CONF}/rpz.conf" 2>&1 )"; then
+		log "err" "Configuration failed." "${debug_level}"
+		if [ -n "${output}" ]; then
+			echo "${output}"
+		fi
+		log_file "${NAMED_CUST_CONF}/rpz.conf"
+		exit 1
+	elif [ "${debug_level}" -gt "1" ]; then
+		if [ -n "${output}" ]; then
+			echo "${output}"
+		fi
+	fi
+	# Validate zone file
+	if ! output="$( named-checkzone "rpz" "${NAMED_CUST_ZONE}/rpz" 2>&1 )"; then
+		log "err" "Configuration failed." "${debug_level}"
+		if [ -n "${output}" ]; then
+			echo "${output}"
+		fi
+		log_file "${NAMED_CUST_CONF}/rpz.conf"
+		log_file "${NAMED_CUST_ZONE}/rpz"
+		exit 1
+	elif [ "${debug_level}" -gt "1" ]; then
+		if [ -n "${output}" ]; then
 			echo "${output}"
 		fi
 	fi
@@ -431,7 +489,7 @@ add_wildcard_zone() {
 
 ####################################################################################################
 ###
-### (4/5) BOOTSTRAP
+### (4/6) BOOTSTRAP
 ###
 ####################################################################################################
 
@@ -461,7 +519,7 @@ log "info" "Debug level: ${DEBUG_ENTRYPOINT}" "${DEBUG_ENTRYPOINT}"
 
 ####################################################################################################
 ###
-### (5/5) ENTRYPOINT
+### (5/6) ENTRYPOINT (DEFAULTS)
 ###
 ####################################################################################################
 
@@ -573,127 +631,118 @@ else
 fi
 
 
+
+####################################################################################################
 ###
-### Add wildcard DNS
+### (6/6) ENTRYPOINT (ZONES)
 ###
-if printenv WILDCARD_DNS >/dev/null 2>&1; then
+####################################################################################################
 
-	# Convert 'com=1.2.3.4[=com],de=2.3.4.5' into newline separated string:
-	#  com=1.2.3.4[=com]
-	#  de=2.3.4.5
-	echo "${WILDCARD_DNS}" | sed 's/,/\n/g' | while read -r line ; do
-		my_dom="$( echo "${line}" | awk -F '=' '{print $1}' | xargs -0 )"  # domain
-		my_add="$( echo "${line}" | awk -F '=' '{print $2}' | xargs -0 )"  # IP address
-		my_rev="$( echo "${line}" | awk -F '=' '{print $3}' | xargs -0 )"  # Reverse DNS record
-		my_cfg="${NAMED_DIR}/devilbox-wildcard_dns.${my_dom}.conf"
+REV_ZONES=""
+FWD_ZONES=""
 
-		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
-		if is_cname "${my_add}"; then
-			# Try ping command first
-			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
-				tmp="${my_add}"
-			fi
-			if ! is_ip4_addr "${tmp}"; then
-				# Try dig command second
-				tmp="$( dig @8.8.8.8 +short "${my_add}" A | head -1 )"
-				if ! is_ip4_addr "${tmp}"; then
-					log "warn" "CNAME '${my_add}' could not be resolved. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
-					continue;
-				fi
-			fi
-			log "info" "CNAME '${my_add}' resolved to: ${tmp}" "${DEBUG_ENTRYPOINT}"
-			my_add="${tmp}"
+###
+### Add Reverse DNS
+###
+if printenv DNS_PTR >/dev/null 2>&1; then
+	while read -r line; do
+		line="$( echo "${line}" | xargs -0 )"
+		if [ -z "${line}" ]; then
+			continue  # For leading or trailing comma in DNS_PTR variable
 		fi
+		addr="$( echo "${line}" | awk -F '=' '{print $1}' | xargs -0 )"
+		name="$( echo "${line}" | awk -F '=' '{print $2}' | xargs -0 )"
 
-		# If specified address is not a valid IPv4 address, skip it
-		if ! is_ip4_addr "${my_add}"; then
-			log "warn" "Invalid IP address '${my_add}': for *.${my_dom} -> ${my_add}. Skipping to add wildcard" "${DEBUG_ENTRYPOINT}"
-			continue;
-		fi
+		# Extract IP address octets
+		o1="$( echo "${addr}" | awk -F '.' '{print $1}' )"
+		o2="$( echo "${addr}" | awk -F '.' '{print $2}' )"
+		o3="$( echo "${addr}" | awk -F '.' '{print $3}' )"
+		o4="$( echo "${addr}" | awk -F '.' '{print $4}' )"
+		zone="${o3}.${o2}.${o1}.in-addr.arpa"
+		ptr="${o4}.${o3}.${o2}.${o1}.in-addr.arpa"
 
-		if [ -n "${my_rev}" ]; then
-			log "info" "Adding wildcard DNS: *.${my_dom} -> ${my_add} (PTR: ${my_rev})" "${DEBUG_ENTRYPOINT}"
-		else
-			log "info" "Adding wildcard DNS: *.${my_dom} -> ${my_add}" "${DEBUG_ENTRYPOINT}"
-		fi
+		# Append zones and get unique ones by newline separated
+		REV_ZONES="$( echo "${REV_ZONES}"$'\n'"${zone}" | grep -vE '^$' | sort -u )"
 
-		echo "include \"${my_cfg}\";" >> "${NAMED_CONF}"
-		add_wildcard_zone \
-			"${my_dom}" \
-			"${my_add}" \
-			"${my_cfg}" \
-			"1" \
-			"${my_rev}" \
+		log "info" "Adding PTR Record: ${addr} -> ${name}" "${DEBUG_ENTRYPOINT}"
+		add_rev_zone \
+			"${addr}" \
+			"${name}" \
+			"${zone}" \
+			"${ptr}" \
 			"${TTL_TIME}" \
 			"${REFRESH_TIME}" \
 			"${RETRY_TIME}" \
 			"${EXPIRY_TIME}" \
 			"${MAX_CACHE_TIME}" \
 			"${DEBUG_ENTRYPOINT}"
-	done
+	done <<< "${DNS_PTR//,/$'\n'}"
+else
+	log "info" "Not adding any PTR records" "${DEBUG_ENTRYPOINT}"
 fi
 
 
 ###
-### Add extra hosts
+### Build forward zones (A Record)
 ###
-if printenv EXTRA_HOSTS >/dev/null 2>&1 && [ -n "$( printenv EXTRA_HOSTS )" ]; then
-
-	# Convert 'com=1.2.3.4[=com],de=2.3.4.5' into newline separated string:
-	#  com=1.2.3.4
-	#  de=2.3.4.5
-	echo "${EXTRA_HOSTS}" | sed 's/,/\n/g' | while read -r line ; do
-		my_dom="$( echo "${line}" | awk -F '=' '{print $1}' | xargs -0 )"  # domain
-		my_add="$( echo "${line}" | awk -F '=' '{print $2}' | xargs -0 )"  # IP address
-		my_rev="$( echo "${line}" | awk -F '=' '{print $3}' | xargs -0 )"  # Reverse DNS record
-		my_cfg="${NAMED_DIR}/devilbox-extra_hosts.${my_dom}.conf"
-
-		# If a CNAME was provided, try to resolve it to an IP address, otherwhise skip it
-		if is_cname "${my_add}"; then
-			# Try ping command first
-			if ! tmp="$( ping -c1 "${my_add}" 2>&1 | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1 )"; then
-				tmp="${my_add}"
-			fi
-			if ! is_ip4_addr "${tmp}"; then
-				# Try dig command second
-				tmp="$( dig @8.8.8.8 +short "${my_add}" A | head -1 )"
-				if ! is_ip4_addr "${tmp}"; then
-					log "warn" "CNAME '${my_add}' could not be resolved. Skipping to add extra host" "${DEBUG_ENTRYPOINT}"
-					continue;
-				fi
-			fi
-			log "info" "CNAME '${my_add}' resolved to: ${tmp}" "${DEBUG_ENTRYPOINT}"
-			my_add="${tmp}"
+if printenv DNS_A >/dev/null 2>&1; then
+	while read -r line; do
+		line="$( echo "${line}" | xargs -0 )"
+		if [ -z "${line}" ]; then
+			continue  # For leading or trailing comma in DNS_A variable
 		fi
+		name="$( echo "${line}" | awk -F '=' '{print $1}' | xargs -0 )"
+		addr="$( echo "${line}" | awk -F '=' '{print $2}' | xargs -0 )"
 
-		# If specified address is not a valid IPv4 address, skip it
-		if ! is_ip4_addr "${my_add}"; then
-			log "warn" "Invalid IP address '${my_add}': for ${my_dom} -> ${my_add}. Skipping to add extra host" "${DEBUG_ENTRYPOINT}"
-			continue;
-		fi
+		# Only a single zone used for forward zones (response policy zone)
+		FWD_ZONES="rpz"
 
-		if [ -n "${my_rev}" ]; then
-			log "info" "Adding extra host: ${my_dom} -> ${my_add} (PTR: ${my_rev})" "${DEBUG_ENTRYPOINT}"
-		else
-			log "info" "Adding extra host: ${my_dom} -> ${my_add}" "${DEBUG_ENTRYPOINT}"
-		fi
-
-		echo "include \"${my_cfg}\";" >> "${NAMED_CONF}"
-		add_wildcard_zone \
-			"${my_dom}" \
-			"${my_add}" \
-			"${my_cfg}" \
-			"0" \
-			"${my_rev}" \
+		log "info" "Adding A Record: ${name} -> ${addr}" "${DEBUG_ENTRYPOINT}"
+		add_fwd_zone \
+			"${name}" \
+			"A" \
+			"${addr}" \
 			"${TTL_TIME}" \
 			"${REFRESH_TIME}" \
 			"${RETRY_TIME}" \
 			"${EXPIRY_TIME}" \
 			"${MAX_CACHE_TIME}" \
 			"${DEBUG_ENTRYPOINT}"
-	done
+	done <<< "${DNS_A//,/$'\n'}"
 else
-	log "info" "Not adding any extra hosts" "${DEBUG_ENTRYPOINT}"
+	log "info" "Not adding any A records" "${DEBUG_ENTRYPOINT}"
+fi
+
+
+###
+### Build forward zones (CNAME Record)
+###
+if printenv DNS_CNAME >/dev/null 2>&1; then
+	while read -r line; do
+		line="$( echo "${line}" | xargs -0 )"
+		if [ -z "${line}" ]; then
+			continue  # For leading or trailing comma in DNS_CNAME variable
+		fi
+		name="$( echo "${line}" | awk -F '=' '{print $1}' | xargs -0 )"
+		addr="$( echo "${line}" | awk -F '=' '{print $2}' | xargs -0 )"
+
+		# Only a single zone used for forward zones (response policy zone)
+		FWD_ZONES="rpz"
+
+		log "info" "Adding CNAME Record: ${name} -> ${addr}" "${DEBUG_ENTRYPOINT}"
+		add_fwd_zone \
+			"${name}" \
+			"CNAME" \
+			"${addr}." \
+			"${TTL_TIME}" \
+			"${REFRESH_TIME}" \
+			"${RETRY_TIME}" \
+			"${EXPIRY_TIME}" \
+			"${MAX_CACHE_TIME}" \
+			"${DEBUG_ENTRYPOINT}"
+	done <<< "${DNS_CNAME//,/$'\n'}"
+else
+	log "info" "Not adding any CNAME records" "${DEBUG_ENTRYPOINT}"
 fi
 
 
@@ -728,11 +777,8 @@ else
 		log "err" "ALLOW_QUERY error: variable specified, but no IP addresses found." "${DEBUG_ENTRYPOINT}"
 		exit 1
 	fi
-
 	# shellcheck disable=SC2153
 	log "info" "Adding custom allow-query options: ${ALLOW_QUERY}" "${DEBUG_ENTRYPOINT}"
-	# Add quotes here
-	#_allow_query_block="${_allow_query_block}"
 fi
 
 
@@ -767,11 +813,8 @@ else
 		log "err" "ALLOW_RECURSION error: variable specified, but no IP addresses found." "${DEBUG_ENTRYPOINT}"
 		exit 1
 	fi
-
 	# shellcheck disable=SC2153
 	log "info" "Adding custom allow-recursion options: ${ALLOW_RECURSION}" "${DEBUG_ENTRYPOINT}"
-	# Add quotes here
-	#_allow_recursion_block="${_allow_recursion_block}"
 fi
 
 
@@ -808,7 +851,8 @@ if ! printenv DNS_FORWARDER >/dev/null 2>&1; then
 		"${DNSSEC_VALIDATE}" \
 		"" \
 		"${_allow_query_block}" \
-		"${_allow_recursion_block}"
+		"${_allow_recursion_block}" \
+		"${FWD_ZONES}"
 else
 
 	# To be pupulated
@@ -843,8 +887,26 @@ else
 		"${DNSSEC_VALIDATE}" \
 		"${_forwarders_block}" \
 		"${_allow_query_block}" \
-		"${_allow_recursion_block}"
+		"${_allow_recursion_block}" \
+		"${FWD_ZONES}"
 fi
+
+
+###
+### Log configured zones
+###
+while IFS= read -r line; do
+	if [ -n "${line}" ]; then
+		log_file "${NAMED_CUST_CONF}/${line}.conf"
+		log_file "${NAMED_CUST_ZONE}/${line}"
+	fi
+done <<< "${REV_ZONES}"
+while IFS= read -r line; do
+	if [ -n "${line}" ]; then
+		log_file "${NAMED_CUST_CONF}/${line}.conf"
+		log_file "${NAMED_CUST_ZONE}/${line}"
+	fi
+done <<< "${FWD_ZONES}"
 
 
 ###
