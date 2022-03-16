@@ -6,12 +6,12 @@ LABEL org.opencontainers.image.authors="cytopia@everythingcli.org"
 ### Install
 ###
 RUN set -eux \
-	&& apt-get update \
-	&& apt-get install --no-install-recommends --no-install-suggests -y \
+	&& apt update \
+	&& apt install --no-install-recommends --no-install-suggests -y \
 		bind9 \
-		dnsutils \
-		iputils-ping \
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+		#nsutils \
+		#putils-ping \
+	&& apt purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
 	&& rm -r /var/lib/apt/lists/* \
 	&& mkdir /var/log/named \
 	&& chown bind:bind /var/log/named \
