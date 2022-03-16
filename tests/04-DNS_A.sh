@@ -22,7 +22,7 @@ REPS=10
 
 
 # DEBUG_ENTRYPOINT=2
-run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=2 -e DOCKER_LOGS=1 -e 'EXTRA_HOSTS=www.devilbox=1.1.1.1' -p ${PORT}:53/udp ${IMAGE}:${TAG}"
+run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=2 -e DOCKER_LOGS=1 -e 'DNS_A=www.devilbox=1.1.1.1' -p ${PORT}:53/udp ${IMAGE}:${TAG}"
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 i=0
@@ -46,7 +46,7 @@ docker_stop "${NAME}"
 
 
 # DEBUG_ENTRYPOINT=1
-run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=1 -e DOCKER_LOGS=1 -e 'EXTRA_HOSTS=www.devilbox=1.1.1.1' -p ${PORT}:53/udp ${IMAGE}:${TAG}"
+run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=1 -e DOCKER_LOGS=1 -e 'DNS_A=www.devilbox=1.1.1.1' -p ${PORT}:53/udp ${IMAGE}:${TAG}"
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 i=0
@@ -70,7 +70,7 @@ docker_stop "${NAME}"
 
 
 # DEBUG_ENTRYPOINT=0
-run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=0 -e DOCKER_LOGS=1 -e 'EXTRA_HOSTS=www.devilbox=1.1.1.1' -p ${PORT}:53/udp ${IMAGE}:${TAG}"
+run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DEBUG_ENTRYPOINT=0 -e DOCKER_LOGS=1 -e 'DNS_A=www.devilbox=1.1.1.1' -p ${PORT}:53/udp ${IMAGE}:${TAG}"
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 i=0
@@ -94,7 +94,7 @@ docker_stop "${NAME}"
 
 
 # DEBUG_ENTRYPOINT=null
-run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DOCKER_LOGS=1 -e 'EXTRA_HOSTS=www.devilbox=1.1.1.1' -p ${PORT}:53/udp ${IMAGE}:${TAG}"
+run "docker run -d --rm --platform ${ARCH} --name ${NAME} -e DEBUG=${DEBUG} -e DOCKER_LOGS=1 -e 'DNS_A=www.devilbox=1.1.1.1' -p ${PORT}:53/udp ${IMAGE}:${TAG}"
 run "sleep ${WAIT}"
 sanity_check "${NAME}"
 i=0

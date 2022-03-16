@@ -33,17 +33,18 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
     2. [Optional environmental variables](#optional-environmental-variables)
         1. [DEBUG_ENTRYPOINT](#debug_entrypoint)
         2. [DOCKER_LOGS](#docker_logs)
-        3. [WILDCARD_DNS](#wildcard_dns)
-        4. [EXTRA_HOSTS](#extra_hosts)
-        5. [DNSSEC_VALIDATE](#dnssec_validate)
-        5. [DNS_FORWARDER](#dns_forwarder)
-        6. [TTL_TIME](#ttl_time)
-        7. [REFRESH_TIME](#refresh_time)
-        8. [RETRY_TIME](#retry_time)
-        9. [EXPIRY_TIME](#expiry_time)
-        10. [MAX_CACHE_TIME](#max_cache_time)
-        11. [ALLOW_QUERY](#allow_query)
-        12. [ALLOW_RECURSION](#allow_recursion)
+        3. [DNS_A](#dns_a)
+        4. [DNS_CNAME](#dns_cname)
+        5. [DNS_PTR](#dns_ptr)
+        6. [DNSSEC_VALIDATE](#dnssec_validate)
+        7. [DNS_FORWARDER](#dns_forwarder)
+        8. [TTL_TIME](#ttl_time)
+        9. [REFRESH_TIME](#refresh_time)
+        10. [RETRY_TIME](#retry_time)
+        11. [EXPIRY_TIME](#expiry_time)
+        12. [MAX_CACHE_TIME](#max_cache_time)
+        13. [ALLOW_QUERY](#allow_query)
+        14. [ALLOW_RECURSION](#allow_recursion)
 2. [Default mountpoints](#default-mountpoints)
 3. [Default ports](#default-ports)
 4. [Examples](#examples)
@@ -74,8 +75,9 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
 | `DEBUG`            | bool   | `0`       | Set to `1` in order to add `set -x` to entrypoint script for bash debugging |
 | `DEBUG_ENTRYPOINT` | bool   | `0`       | Show shell commands executed during start.<br/>Values: `0`, `1` or `2` |
 | `DOCKER_LOGS`      | bool   | `0`       | Set to `1` to log info and queries to Docker logs. |
-| `WILDCARD_DNS`     | string |           | Add one or more tld's, domains or subdomains as catch-all for a specific IP address or CNAME. Reverse DNS is optional and can also be specified. |
-| `EXTRA_HOSTS`      | string |           | Add one or more hosts (CNAME: tld's, domains, subdomains) to map to a specific IP address or CNAME. Reverse DNS is optional and can also be specified. |
+| `DNS_A`            | string |           | Comma separated list of A records (wildcard supported). |
+| `DNS_CNAME`        | string |           | Comma separated list of CNAME records (wildcard supported). |
+| `DNS_PTR`          | string |           | Comma separated list of PTR records (reverse DNS). |
 | `DNSSEC_VALIDATE`  | string | `no`      | Control the behaviour of DNSSEC validation. The default is to not validate: `no`. Other possible values are: `yes` and `auto`. |
 | `DNS_FORWARDER`    | string |           | Specify a comma separated list of IP addresses as custom DNS resolver. This is useful if your LAN already has a DNS server which adds custom/internal domains and you still want to keep them in this DNS server<br/>Example: `DNS_FORWARDER=8.8.8.8,8.8.4.4` |
 | `TTL_TIME`         | int    | `3600`    | (Time in seconds) See [BIND TTL](http://www.zytrax.com/books/dns/apa/ttl.html) and [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html)|
@@ -96,95 +98,65 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
 * If set to `0`, no additional logging is done during run-time
 * If set to `1`, BIND is more verbose during run-time and shows asked queries as well as general information
 
-#### WILDCARD_DNS
+#### DNS_A
 
-The `WILDCARD_DNS` option allows you to specify one or more multiple catch-all DNS zones which can either
-be a full TLD, a domain or any kind of subdomain. It allows you to map your catch-all to a specific
-IP address or even a CNAME (if it is resolvable by public DNS servers). Optionally you can also assign
-the reverse DNS name (PTR record).
+The `DNS_A` option allows you to specify one or more A records (including wildcard if required) which can either
+be a full TLD, a domain or any kind of subdomain. It allows you to map your Domain to a specific
+IP address.
 
-The general format is as follows, whereas the string in square brackets it optional and responsible
-for the reverse DNS (PTR records):
+The general format is as follows:
 ```bash
 # Structure
-WILDCARD_DNS='tld1=1.1.1.1[=tld],tld2=2.2.2.2[=tld2]'
-WILDCARD_DNS='tld1=CNAME1[=tld],tld2=CNAME2[=tld2]'
+DNS_A='tld1=1.1.1.1, tld2=2.2.2.2, *.tld3=3.3.3.3'
 ```
 
 Some examples:
 ```bash
 # 1. One entry:
-# The following catches all queries to *.tld and redirects them to 192.168.0.1
-WILDCARD_DNS='tld=192.168.0.1'
+# The following catches all queries to *.tld (wildcard) and redirects them to 192.168.0.1
+DNS_A='*.tld=192.168.0.1'
 
 # 2. Two entries:
 # The following catches all queries to *.tld and redirects them to 192.168.0.1
 # As well as all queries from *.example.org and redirects them to 192.168.0.2
-WILDCARD_DNS='tld=192.168.0.1,example.org=192.168.0.2'
-
-# 3. Using CNAME's for resolving:
-# The following catches all queries to *.tld and redirects them to whatever
-# IP example.org resolved to
-WILDCARD_DNS='tld=example.org'
-
-# 4. Adding reverse DNS:
-# The following catches all queries to *.tld and redirects them to 192.168.0.1
-# As well as adding reverse DNS from 192.168.0.1 to resolve to tld
-WILDCARD_DNS='tld=192.168.0.1=tld'
-
-# 5. Complex example
-# The following catches all queries to *.tld and redirects them to whatever
-# IP example.org resolved to. Additionally it adds a reverse DNS record from example.org's
-# IP to resolve to tld (PTR record)
-# It also adds another catch-all for the subdomain of *.cytopia.tld which will point to 192.168.0.1
-# Including a reverse DNS record back to cytopia.tld
-WILDCARD_DNS='tld=example.org=tld,cytopia.tld=192.168.0.1=cytopia.tld'
+DNS_A='*.tld=192.168.0.1, *.example.org=192.168.0.2'
 ```
 
-#### EXTRA_HOSTS
+#### DNS_CNAME
 
-The `EXTRA_HOSTS` option almost works like the `WILDCARD_DNS` option, except that no wildcard is added,
-but rather exactly the host you have specified.
+The `DNS_CNAME` option allows you to specify one or more CNAME records (including wildcard if required) which can either
+be a full TLD, a domain or any kind of subdomain. It allows you to map your Domain to a specific
+IP address.
 
-This is useful if you want to add extra hosts to your setup just like the Docker Compose option
-[extra_hosts](https://docs.docker.com/compose/compose-file/#extra_hosts)
-
-```bash
+The general format is as follows:
+```
 # Structure
-EXTRA_HOSTS='host1=1.1.1.1[=host1],host2=2.2.2.2[=host2]'
-EXTRA_HOSTS='host1=CNAME1[=host1],host2=CNAME2[=host2]'
+DNS_CNAME='tld1=google.com, tld2=www.google.com, *.tld3=example.org'
 ```
 
 Some examples:
-```bash
-# 1. One entry:
-# The following extra host 'tld' is added and will always point to 192.168.0.1.
-# When reverse resolving '192.168.0.1' it will answer with 'tld'.
-EXTRA_HOSTS='tld=192.168.0.1'
+```
+# 1. Using CNAME's for resolving:
+# The following catches all queries to *.tld and redirects them to whatever
+# IP example.org resolved to
+DNS_CNAME='*.tld=example.org'
+```
 
-# 2. One entry:
-# The following extra host 'my.host' is added and will always point to 192.168.0.1.
-# When reverse resolving '192.168.0.1' it will answer with 'my.host'.
-EXTRA_HOSTS='my.host=192.168.0.1'
+#### DNS_PTR
 
-# 3. Two entries:
-# The following extra host 'tld' is added and will always point to 192.168.0.1.
-# When reverse resolving '192.168.0.1' it will answer with 'tld'.
-# A second extra host 'example.org' is added and always redirects to 192.168.0.2
-# When reverse resolving '192.168.0.2' it will answer with 'example.org'.
-EXTRA_HOSTS='tld=192.168.0.1,example.org=192.168.0.2'
+The `DNS_PTR` option allows you to specify PTR records (reverse DNS).
 
-# 4. Using CNAME's for resolving:
-# The following extra host 'my.host' is added and will always point to whatever
-# IP example.org resolves to.
-# When reverse resolving '192.168.0.1' it will answer with 'my.host'.
-EXTRA_HOSTS='my.host=example.org'
+The general format is as follows:
+```
+# Structure
+DNS_PTR='192.168.0.1=www.google.com, 192.168.0.2=ftp.google.com'
+```
 
-# 5. Adding reverse DNS:
-# The following extra host 'my.host' is added and will always point to whatever
-# IP example.org resolves to.
-# As well as adding reverse DNS from 192.168.0.1 to resolve to tld
-EXTRA_HOSTS='tld=192.168.0.1=tld'
+Some examples:
+```
+# 1. Adding reverse DNS:
+# The following adds reverse DNS from 192.168.0.1 to resolve to tld
+DNS_PTR='192.168.0.1=tld'
 ```
 
 #### DNSSEC_VALIDATE
@@ -300,55 +272,56 @@ $ docker run -i \
 
 #### Wildcard domain
 
-Let's add a wildcard zone for `*.example.com`. All subdomains as well as the main domain will resolve
+Let's add a wildcard zone for `*.example.com`. All subdomains (but not example.com itself) will resolve
 to `192.168.0.1`.
 ```bash
 $ docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
-    -e WILDCARD_DNS='example.com=192.168.0.1' \
+    -e DNS_A='*.example.com=192.168.0.1' \
     -t cytopia/bind
 ```
 
 #### Wildcard subdomain
 
-Let's add a wildcard zone for `*.aws.example.com`. All subdomains as well as the main subdomain will resolve
+Let's add a wildcard zone for `*.aws.example.com`. All subdomains (but not aws.example.com itself) will resolve
 to `192.168.0.1`.
 ```bash
 $ docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
-    -e WILDCARD_DNS='aws.example.com=192.168.0.1' \
+    -e DNS_A='*.aws.example.com=192.168.0.1' \
     -t cytopia/bind
 ```
 
 #### Wildcard TLD
 
-Let's add a wildcard zone for `*.loc`. All domains, subdomain as well as the TLD itself will resolve
+Let's add a wildcard zone for `*.loc`. All domains, subdomain (but not loc itself) will resolve
 to `192.168.0.4`.
 ```bash
 $ docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
-    -e WILDCARD_DNS='loc=192.168.0.4' \
+    -e DNS_A='*.loc=192.168.0.4' \
     -t cytopia/bind
 ```
 
 #### Wildcard TLD and reverse DNS entry
 
-Let's add a wildcard zone for `*.loc`. All domains, subdomain as well as the TLD itself will resolve
+Let's add a wildcard zone for `*.loc`, and an A record for loc. All domains, subdomain and loc itself will resolve
 to `192.168.0.4`. Additionally we specify that `host.loc` will be the reverse loopup for `192.168.0.4`.
 ```bash
 $ docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
-    -e WILDCARD_DNS='loc=192.168.0.4=host.loc' \
+    -e DNS_A='*.loc=192.168.0.4, loc=192.168.0.4' \
+    -e DNS_PTR='192.168.0.4=host.loc' \
     -t cytopia/bind
 ```
 
 #### Wildcard TLD and DNS resolver
 
-Let's add a wildcard zone for `*.loc`. All domains, subdomain as well as the TLD itself will resolve
+Let's add a wildcard zone for `*.loc`. All its domains (but not the domain itself) will resolve
 to `192.168.0.4`.
 
 Let's also hook in our imaginary corporate DNS server into this container, so we can make use of
@@ -361,16 +334,16 @@ any already defined custom DNS entries by that nameserver.
 $ docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
-    -e WILDCARD_DNS='loc=192.168.0.1' \
+    -e DNS_A='*.loc=192.168.0.1' \
     -e DNS_FORWARDER=10.0.15.1,10.0.15.2 \
     -t cytopia/bind
 ```
 
 #### Wildcard TLD, DNS resolver and extra hosts
 
-* `loc` and all its subdomains (such as: `hostname.loc`) will point to `192.168.0.1`:
+* All subdomains of `loc` (but not `loc` itself) will point to `192.168.0.1`
 * Your corporate DNS servers are `10.0.15.1` and `10.0.15.2`
-* Also add two extra hosts with custom DNS:
+* Also add two additional hosts with A and PTR records:
     - host5.loc -> 192.168.0.2
     - host5.org -> 192.168.0.3
 
@@ -378,8 +351,8 @@ $ docker run -i \
 $ docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
-    -e WILDCARD_DNS='loc=192.168.0.1' \
-    -e EXTRA_HOSTS='host5.loc=192.168.0.2,host5.org=192.168.0.3' \
+    -e DNS_A='*.loc=192.168.0.1, host5.loc=192.168.0.2, host5.org=192.168.0.3' \
+    -e DNS_PTR='192.168.0.2=host5.loc, 192.168.0.3=host5.org' \
     -e DNS_FORWARDER=10.0.15.1,10.0.15.2 \
     -t cytopia/bind
 ```
@@ -400,7 +373,7 @@ $ docker run -i \
 $ docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
-    -e EXTRA_HOSTS='host1=192.168.0.11' \
+    -e DNS_A='host1=192.168.0.11' \
     -e DNS_FORWARDER=8.8.8.8,8.8.4.4 \
     -e ALLOW_QUERY=192.168.0.0/24,127.0.0.1 \
     -e ALLOW_RECURSION=192.168.0.0/24,127.0.0.1 \
