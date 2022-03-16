@@ -284,18 +284,21 @@ add_options() {
 		fi
 		if [ -n "${forwarders}" ]; then
 			echo "    forwarders {"
-			printf       "%s" "${forwarders}"
+			# shellcheck disable=SC2059
+			printf       "${forwarders}\n"
 			echo "    };"
 		fi
 		if [ -n "${allow_recursion}" ]; then
 			echo "    recursion yes;"
 			echo "    allow-recursion {"
-			printf        "%s" "${allow_recursion}"
+			# shellcheck disable=SC2059
+			printf        "${allow_recursion}\n"
 			echo "    };"
 		fi
 		if [ -n "${allow_query}" ]; then
 			echo "    allow-query {"
-			printf        "%s" "${allow_query}"
+			# shellcheck disable=SC2059
+			printf        "${allow_query}\n"
 		  echo "    };"
 		fi
 		echo "};"
