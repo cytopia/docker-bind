@@ -22,8 +22,8 @@ jobs:
   # (2/2) Build
   docker:
     needs: [params]
-    #uses: devilbox/github-actions/.github/workflows/docker-name-version-arch.yml@master
-    uses: ./.github/workflows/docker-name-version-arch.yml
+    #uses: devilbox/github-actions/.github/workflows/docker-name-version-flavour-arch.yml@master
+    uses: ./.github/workflows/docker-name-version-flavour-arch.yml
     with:
       enabled: true
       can_deploy: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/release-') }}

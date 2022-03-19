@@ -1,6 +1,9 @@
 FROM debian:stable-slim
 LABEL org.opencontainers.image.authors="cytopia@everythingcli.org"
 
+ENV \
+	USER=bind \
+	GROUP=bind
 
 ###
 ### Install
@@ -9,8 +12,6 @@ RUN set -eux \
 	&& apt update \
 	&& apt install --no-install-recommends --no-install-suggests -y \
 		bind9 \
-		#nsutils \
-		#putils-ping \
 	&& apt purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
 	&& rm -r /var/lib/apt/lists/* \
 	&& mkdir /var/log/named \

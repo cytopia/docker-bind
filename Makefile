@@ -27,9 +27,18 @@ TAG        = latest
 NAME       = Bind
 VERSION    = latest
 IMAGE      = cytopia/bind
-DIR        = .
-FILE       = Dockerfile
-DOCKER_TAG = $(TAG)
+FLAVOUR    = latest
+DIR        = Dockerfiles
+FILE       = Dockerfile.$(FLAVOUR)
+ifeq ($(strip $(FLAVOUR)),latest)
+	DOCKER_TAG = $(TAG)
+else
+	ifeq ($(strip $(TAG)),latest)
+		DOCKER_TAG = $(FLAVOUR)
+	else
+		DOCKER_TAG = $(FLAVOUR)-$(TAG)
+	endif
+endif
 ARCH       = linux/amd64
 
 # Makefile.lint overwrites
