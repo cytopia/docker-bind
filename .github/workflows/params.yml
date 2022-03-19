@@ -14,8 +14,15 @@ env:
     [
       {
         "NAME":    "Bind",
-        "VERSION": ["latest"],
+        "VERSION": ["9"],
+        "FLAVOUR": ["stable", "latest"],
         "ARCH":    ["linux/amd64", "linux/386", "linux/arm64", "linux/arm/v7", "linux/arm/v6", "linux/ppc64le", "linux/s390x", "linux/mips64le"]
+      },
+      {
+        "NAME":    "Bind",
+        "VERSION": ["9"],
+        "FLAVOUR": ["alpine"],
+        "ARCH":    ["linux/amd64", "linux/386", "linux/arm64", "linux/arm/v7", "linux/arm/v6", "linux/ppc64le", "linux/s390x"]
       }
     ]
 

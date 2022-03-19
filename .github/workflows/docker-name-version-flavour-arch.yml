@@ -69,12 +69,12 @@ jobs:
             MATRIX_BUILD="$( \
               jq -M -c \
                 --argjson refs   '${{ inputs.refs }}' \
-                'map({name:.NAME, version:.VERSION[], arch:.ARCH[], refs:$refs[]})' <<<'${{ inputs.matrix }}' \
+                'map({name:.NAME, version:.VERSION[], flavour:.FLAVOUR[], arch:.ARCH[], refs:$refs[]})' <<<'${{ inputs.matrix }}' \
             )"
             MATRIX_DEPLOY="$( \
               jq -M -c \
                 --argjson refs   '${{ inputs.refs }}' \
-                'map({name:.NAME, version:.VERSION[], refs:$refs[]})' <<<'${{ inputs.matrix }}' \
+                'map({name:.NAME, version:.VERSION[], flavour:.FLAVOUR[], refs:$refs[]})' <<<'${{ inputs.matrix }}' \
             )"
             echo "::set-output name=matrix_build::${MATRIX_BUILD}"
             echo "::set-output name=matrix_deploy::${MATRIX_DEPLOY}"
@@ -82,11 +82,11 @@ jobs:
           else
             MATRIX_BUILD="$( \
               jq -M -c \
-                'map({name:.NAME, version:.VERSION[], arch:.ARCH[]})' <<<'${{ inputs.matrix }}' \
+                'map({name:.NAME, version:.VERSION[], flavour:.FLAVOUR[], arch:.ARCH[]})' <<<'${{ inputs.matrix }}' \
             )"
             MATRIX_DEPLOY="$( \
               jq -M -c \
-                'map({name:.NAME, version:.VERSION[]})' <<<'${{ inputs.matrix }}' \
+                'map({name:.NAME, version:.VERSION[], flavour:.FLAVOUR[]})' <<<'${{ inputs.matrix }}' \
             )"
             echo "::set-output name=matrix_build::${MATRIX_BUILD}"
             echo "::set-output name=matrix_deploy::${MATRIX_DEPLOY}"
@@ -114,7 +114,7 @@ jobs:
   # -----------------------------------------------------------------------------------------------
   build:
     needs: [configure]
-    name: Build ${{ matrix.name }}-${{ matrix.version }} (${{ matrix.arch }}) ${{ matrix.refs }}
+    name: Build ${{ matrix.name }}-${{ matrix.version }} (${{ matrix.flavour }}) (${{ matrix.arch }}) ${{ matrix.refs }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -155,7 +155,7 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make build NAME=${{ matrix.name }} VERSION=${{ matrix.version }} ARCH=${{ matrix.arch }} TAG=${{ steps.tag.outputs.docker-tag }}
+            make build NAME=${{ matrix.name }} VERSION=${{ matrix.version }} FLAVOUR=${{ matrix.flavour }} ARCH=${{ matrix.arch }} TAG=${{ steps.tag.outputs.docker-tag }}
 
       # ------------------------------------------------------------
       # Test
@@ -164,7 +164,7 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make test NAME=${{ matrix.name }} VERSION=${{ matrix.version }} ARCH=${{ matrix.arch }} TAG=${{ steps.tag.outputs.docker-tag }}
+            make test NAME=${{ matrix.name }} VERSION=${{ matrix.version }} FLAVOUR=${{ matrix.flavour }} ARCH=${{ matrix.arch }} TAG=${{ steps.tag.outputs.docker-tag }}
 
       # ------------------------------------------------------------
       # Deploy
@@ -180,7 +180,7 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make push NAME=${{ matrix.name }} VERSION=${{ matrix.version }} ARCH=${{ matrix.arch }} TAG=${{ steps.tag.outputs.docker-tag }}
+            make push NAME=${{ matrix.name }} VERSION=${{ matrix.version }} FLAVOUR=${{ matrix.flavour }} ARCH=${{ matrix.arch }} TAG=${{ steps.tag.outputs.docker-tag }}
         if: needs.configure.outputs.can_login == 1 && inputs.can_deploy
 
   # -----------------------------------------------------------------------------------------------
@@ -188,7 +188,7 @@ jobs:
   # -----------------------------------------------------------------------------------------------
   deploy:
     needs: [configure, build]
-    name: Deploy ${{ matrix.name }}-${{ matrix.version }} ${{ matrix.refs }}
+    name: Deploy ${{ matrix.name }}-${{ matrix.version }} (${{ matrix.flavour }}) ${{ matrix.refs }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -221,8 +221,8 @@ jobs:
         run: |
           ARCHES="$( echo '${{ inputs.matrix }}' \
             | jq 'group_by(.NAME, .VERSION, .ARCH)' \
-            | jq 'map({NAME: .[].NAME, VERSION: .[].VERSION[], ARCHES: .[].ARCH|join(",")})' \
-            | jq '.[] | select(.NAME=="${{ matrix.name }}" and .VERSION=="${{ matrix.version }}") | .ARCHES' \
+            | jq 'map({NAME: .[].NAME, VERSION: .[].VERSION[], FLAVOUR: .[].FLAVOUR[], ARCHES: .[].ARCH|join(",")})' \
+            | jq '.[] | select(.NAME=="${{ matrix.name }}" and .VERSION=="${{ matrix.version }}" and .FLAVOUR=="${{ matrix.flavour }}") | .ARCHES' \
             | jq -c -M \
           )"
           echo "::set-output name=arches::${ARCHES}"
@@ -242,10 +242,10 @@ jobs:
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make manifest-create NAME=${{ matrix.name }} VERSION=${{ matrix.version }} ARCHES=${{ steps.manifest.outputs.arches }} TAG=${{ steps.tag.outputs.docker-tag }}
+            make manifest-create NAME=${{ matrix.name }} VERSION=${{ matrix.version }} FLAVOUR=${{ matrix.flavour }} ARCHES=${{ steps.manifest.outputs.arches }} TAG=${{ steps.tag.outputs.docker-tag }}
 
       - name: "[DEPLOY] Publish Docker manifest: ${{ steps.tag.outputs.docker-tag }}"
         uses: cytopia/shell-command-retry-action@v0.1.2
         with:
           command: |
-            make manifest-push NAME=${{ matrix.name }} VERSION=${{ matrix.version }} TAG=${{ steps.tag.outputs.docker-tag }}
+            make manifest-push NAME=${{ matrix.name }} VERSION=${{ matrix.version }} FLAVOUR=${{ matrix.flavour }} TAG=${{ steps.tag.outputs.docker-tag }}

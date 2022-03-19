@@ -27,6 +27,13 @@ NAMED_LOG_CONF="${NAMED_DIR}/named.conf.logging"
 NAMED_CUST_CONF="${NAMED_DIR}/custom/conf"
 NAMED_CUST_ZONE="${NAMED_DIR}/custom/zone"
 
+# Recreate custom config directories
+if [ -d "${NAMED_CUST_CONF}" ]; then
+	rm -rf "${NAMED_CUST_CONF}"
+fi
+if [ -d "${NAMED_CUST_ZONE}" ]; then
+	rm -rf "${NAMED_CUST_ZONE}"
+fi
 mkdir -p "${NAMED_CUST_CONF}"
 mkdir -p "${NAMED_CUST_ZONE}"
 
@@ -37,7 +44,13 @@ mkdir -p "${NAMED_CUST_ZONE}"
 ### When overwriting, use an FQDN by which this container is reachable.
 ### http://rscott.org/dns/soa.html
 ###
-DEFAULT_MNAME="$( hostname -A | sed 's/\s$//g' | xargs -0 )"
+if [ -f "/etc/alpine-release" ]; then
+	# Alpine
+	DEFAULT_MNAME="$( hostname -f | sed 's/\s$//g' | xargs -0 )"
+else
+	# Debian
+	DEFAULT_MNAME="$( hostname -A | sed 's/\s$//g' | xargs -0 )"
+fi
 
 
 ###
@@ -532,10 +545,14 @@ log "info" "Debug level: ${DEBUG_ENTRYPOINT}" "${DEBUG_ENTRYPOINT}"
 {
 	echo "include \"${NAMED_LOG_CONF}\";"
 	echo "include \"${NAMED_OPT_CONF}\";"
-	echo "include \"/etc/bind/named.conf.local\";"
-	echo "include \"/etc/bind/named.conf.default-zones\";"
+	if [ -f "/etc/bind/named.conf.local" ]; then
+		echo "include \"/etc/bind/named.conf.local\";"
+	fi
+	if [ -f "/etc/bind/named.conf.default-zones" ]; then
+		echo "include \"/etc/bind/named.conf.default-zones\";"
+	fi
 } > "${NAMED_CONF}"
-
+log_file "${NAMED_CONF}"
 
 
 ###
@@ -917,4 +934,4 @@ done <<< "${FWD_ZONES}"
 ###
 log "info" "Starting $( named -V | grep -oiE '^BIND[[:space:]]+[0-9.]+' )" "${DEBUG_ENTRYPOINT}"
 named-checkconf "${NAMED_CONF}"
-exec /usr/sbin/named -4 -c /etc/bind/named.conf -u bind -f
+exec /usr/sbin/named -4 -c /etc/bind/named.conf -u "${USER}" -f

@@ -23,6 +23,22 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
 |------------|------------------|
 | <a href="https://hub.docker.com/r/cytopia/bind"><img height="82px" src="http://dockeri.co/image/cytopia/bind" /></a> | <a href="https://github.com/cytopia/devilbox" ><img height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a> |
 
+## Available Docker tags
+
+| Docker Tag                     | Description                                                  |
+|--------------------------------|--------------------------------------------------------------|
+| `latest`                       | Latest Debian stable image (default)                         |
+| `stable`                       | Latest Debian stable image                                   |
+| `alpine`                       | Latest Alpine image                                          |
+|                                |                                                              |
+| `[0-9]\.[0-9]+`                | Git tagged Debian stable image. E.g: `0.53`                  |
+| `stable-[0-9]\.[0-9]+`         | Git tagged Debian stable image. E.g: `stable-0.53`           |
+| `alpine-[0-9]\.[0-9]+`         | Git tagged Alpine image. E.g: `alpine-0.53`                  |
+|                                |                                                              |
+| `release-[0-9]\.[0-9]+`        | Git branch Debian stable image. E.g: `release-0.53`          |
+| `stable-release-[0-9]\.[0-9]+` | Git branch Debian stable image. E.g: `stable-release-0.53`   |
+| `alpine-release-[0-9]\.[0-9]+` | Git branch Alpine image. E.g: `alpine-release-0.53`          |
+
 
 ----
 

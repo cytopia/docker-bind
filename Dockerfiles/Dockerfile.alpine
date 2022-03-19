@@ -1,0 +1,43 @@
+FROM alpine
+LABEL org.opencontainers.image.authors="cytopia@everythingcli.org"
+
+ENV \
+	USER=named \
+	GROUP=named
+
+###
+### Install
+###
+RUN set -x \
+	&& apk add --no-cache \
+		bash \
+		bind \
+		bind-tools \
+	# Log directory
+	&& mkdir /var/log/named \
+	&& chown ${USER}:${GROUP} /var/log/named \
+	&& chmod 0755 /var/log/named \
+	# Cache directory
+	&& mkdir /var/cache/bind \
+	&& chown root:${GROUP} /var/cache/bind \
+	&& chmod 0775 /var/cache/bind
+
+
+
+###
+### Bootstrap Scipts
+###
+COPY ./data/docker-entrypoint.sh /
+
+
+###
+### Ports
+###
+EXPOSE 53
+EXPOSE 53/udp
+
+
+####
+#### Entrypoint
+####
+ENTRYPOINT ["/docker-entrypoint.sh"]
