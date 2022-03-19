@@ -27,6 +27,13 @@ NAMED_LOG_CONF="${NAMED_DIR}/named.conf.logging"
 NAMED_CUST_CONF="${NAMED_DIR}/custom/conf"
 NAMED_CUST_ZONE="${NAMED_DIR}/custom/zone"
 
+# Recreate custom config directories
+if [ -d "${NAMED_CUST_CONF}" ]; then
+	rm -rf "${NAMED_CUST_CONF}"
+fi
+if [ -d "${NAMED_CUST_ZONE}" ]; then
+	rm -rf "${NAMED_CUST_ZONE}"
+fi
 mkdir -p "${NAMED_CUST_CONF}"
 mkdir -p "${NAMED_CUST_ZONE}"
 
@@ -693,13 +700,6 @@ if printenv DNS_PTR >/dev/null 2>&1; then
 else
 	log "info" "Not adding any PTR records" "${DEBUG_ENTRYPOINT}"
 fi
-
-
-###
-### Forward zones (resource policy zone)
-###
-# Empty out first
-echo > "${NAMED_CUST_CONF}/rpz.conf"
 
 
 ###
