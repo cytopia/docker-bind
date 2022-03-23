@@ -19,25 +19,25 @@ jobs:
           fetch-depth: 0
 
       - name: Lint Files
-        uses: cytopia/shell-command-retry-action@v0.1.2
+        uses: cytopia/shell-command-retry-action@v0.1.3
         with:
           command: |
             make lint-files
 
       - name: Lint Yaml
-        uses: cytopia/shell-command-retry-action@v0.1.2
+        uses: cytopia/shell-command-retry-action@v0.1.3
         with:
           command: |
             make lint-yaml
 
       - name: Lint JSON
-        uses: cytopia/shell-command-retry-action@v0.1.2
+        uses: cytopia/shell-command-retry-action@v0.1.3
         with:
           command: |
             make lint-json
 
       - name: Lint Bash
-        uses: cytopia/shell-command-retry-action@v0.1.2
+        uses: cytopia/shell-command-retry-action@v0.1.3
         with:
           command: |
             make lint-bash
