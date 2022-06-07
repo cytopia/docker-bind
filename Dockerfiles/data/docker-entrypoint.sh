@@ -49,7 +49,7 @@ if [ -f "/etc/alpine-release" ]; then
 	DEFAULT_MNAME="$( hostname -f | sed 's/\s$//g' | xargs -0 )"
 else
 	# Debian
-	DEFAULT_MNAME="$( hostname -A | sed 's/\s$//g' | xargs -0 )"
+	DEFAULT_MNAME="$( hostname -f | sed 's/\s$//g' | xargs -0 )"
 fi
 
 
