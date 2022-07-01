@@ -98,7 +98,7 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
 | `DNSSEC_VALIDATE`  | string | `no`      | Control the behaviour of DNSSEC validation. The default is to not validate: `no`. Other possible values are: `yes` and `auto`. |
 | `DNS_FORWARDER`    | string |           | Specify a comma separated list of IP addresses as custom DNS resolver. This is useful if your LAN already has a DNS server which adds custom/internal domains and you still want to keep them in this DNS server<br/>Example: `DNS_FORWARDER=8.8.8.8,8.8.4.4` |
 | `MAX_CACHE_SIZE`   | size   | `90%`     | Amount of memory used by the server (cached results) |
-| `ttl_time`         | int    | `3600`    | (time in seconds) see [bind ttl](http://www.zytrax.com/books/dns/apa/ttl.html) and [bind soa](http://www.zytrax.com/books/dns/ch8/soa.html)|
+| `TTL_TIME`         | int    | `3600`    | (time in seconds) see [bind ttl](http://www.zytrax.com/books/dns/apa/ttl.html) and [bind soa](http://www.zytrax.com/books/dns/ch8/soa.html)|
 | `REFRESH_TIME`     | int    | `1200`    | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
 | `RETRY_TIME`       | int    | `180`     | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
 | `EXPIRY_TIME`      | int    | `1209600` | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
