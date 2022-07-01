@@ -76,6 +76,7 @@ DEFAULT_REFRESH_TIME=1200
 DEFAULT_RETRY_TIME=180
 DEFAULT_EXPIRY_TIME=1209600
 DEFAULT_MAX_CACHE_TIME=10800
+DEFAULT_MAX_CACHE_SIZE="90%"
 
 
 
@@ -285,6 +286,7 @@ add_options() {
 	local allow_query="${4}"
 	local allow_recursion="${5}"
 	local response_policy="${6}"
+	local max_cache_size="${7}"
 
 	{
 		echo "options {"
@@ -292,6 +294,7 @@ add_options() {
 		echo "    dnssec-validation ${dnssec_validate};"
 		echo "    auth-nxdomain no;    # conform to RFC1035"
 		echo "    listen-on-v6 { any; };"
+		echo "    max-cache-size ${max_cache_size};"
 		if [ -n "${response_policy}" ]; then
 			echo "    response-policy { zone \"${response_policy}\"; };"
 		fi
@@ -650,6 +653,39 @@ else
 	MAX_CACHE_TIME="${DEFAULT_MAX_CACHE_TIME}"
 fi
 
+if printenv MAX_CACHE_SIZE >/dev/null 2>&1 && [ -n "$( printenv MAX_CACHE_SIZE )" ]; then
+	MAX_CACHE_SIZE="$( printenv MAX_CACHE_SIZE )"
+	if [ "${MAX_CACHE_SIZE}" = "unlimited" ]; then
+		log "info" "Changing DNS Max Cache size to: ${MAX_CACHE_SIZE}" "${DEBUG_ENTRYPOINT}"
+	elif [ "${MAX_CACHE_SIZE}" = "0" ]; then
+		log "info" "Changing DNS Max Cache size to: ${MAX_CACHE_SIZE}" "${DEBUG_ENTRYPOINT}"
+	# Extract value and unit
+	else
+		MAX_CACHE_SIZE_VALUE="$( echo "${MAX_CACHE_SIZE}" | grep -Eo '[0-9]+' )"
+		MAX_CACHE_SIZE_UNIT="$( echo "${MAX_CACHE_SIZE}"  | grep -Eo '[^0-9]+' )"  # Allowed: %, k, K, m, M, g, G or empty
+
+		if [ -z "${MAX_CACHE_SIZE_VALUE}" ]; then
+			log "warn" "Wrong value for \$MAX_CACHE_SIZE '${MAX_CACHE_SIZE}', defaultint to: ${DEFAULT_MAX_CACHE_SIZE}" "${DEBUG_ENTRYPOINT}"
+			MAX_CACHE_SIZE="${DEFAULT_MAX_CACHE_SIZE}"
+		elif [ -z "${MAX_CACHE_SIZE_UNIT}" ]; then
+			log "info" "Changing DNS Max Cache size to: ${MAX_CACHE_SIZE}" "${DEBUG_ENTRYPOINT}"
+			MAX_CACHE_SIZE="${MAX_CACHE_SIZE_VALUE}"
+		else
+			# Validate correct unit
+			if ! echo "${MAX_CACHE_SIZE_UNIT}" | grep -E '[%kKmMgG]' >/dev/null; then
+				log "warn" "Wrong unit for \$MAX_CACHE_SIZE '${MAX_CACHE_SIZE_UNIT}', defaultint to: ${DEFAULT_MAX_CACHE_SIZE}" "${DEBUG_ENTRYPOINT}"
+				MAX_CACHE_SIZE="${DEFAULT_MAX_CACHE_SIZE}"
+			else
+				log "info" "Changing DNS Max Cache size to: ${MAX_CACHE_SIZE}" "${DEBUG_ENTRYPOINT}"
+				MAX_CACHE_SIZE="${MAX_CACHE_SIZE_VALUE}${MAX_CACHE_SIZE_UNIT}"
+			fi
+		fi
+	fi
+else
+	log "info" "Using default DNS Max Cache size: ${DEFAULT_MAX_CACHE_SIZE}" "${DEBUG_ENTRYPOINT}"
+	MAX_CACHE_SIZE="${DEFAULT_MAX_CACHE_SIZE}"
+fi
+
 
 
 ####################################################################################################
@@ -872,7 +908,8 @@ if ! printenv DNS_FORWARDER >/dev/null 2>&1; then
 		"" \
 		"${_allow_query_block}" \
 		"${_allow_recursion_block}" \
-		"${FWD_ZONES}"
+		"${FWD_ZONES}" \
+		"${MAX_CACHE_SIZE}"
 else
 
 	# To be pupulated
@@ -908,7 +945,8 @@ else
 		"${_forwarders_block}" \
 		"${_allow_query_block}" \
 		"${_allow_recursion_block}" \
-		"${FWD_ZONES}"
+		"${FWD_ZONES}" \
+		"${MAX_CACHE_SIZE}"
 fi
 
 
