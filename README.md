@@ -54,13 +54,14 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
         5. [DNS_PTR](#dns_ptr)
         6. [DNSSEC_VALIDATE](#dnssec_validate)
         7. [DNS_FORWARDER](#dns_forwarder)
-        8. [TTL_TIME](#ttl_time)
-        9. [REFRESH_TIME](#refresh_time)
-        10. [RETRY_TIME](#retry_time)
-        11. [EXPIRY_TIME](#expiry_time)
-        12. [MAX_CACHE_TIME](#max_cache_time)
-        13. [ALLOW_QUERY](#allow_query)
-        14. [ALLOW_RECURSION](#allow_recursion)
+        8. [MAX_CACHE_SIZE](#max_cache_size)
+        9. [TTL_TIME](#ttl_time)
+        10. [REFRESH_TIME](#refresh_time)
+        11. [RETRY_TIME](#retry_time)
+        12. [EXPIRY_TIME](#expiry_time)
+        13. [MAX_CACHE_TIME](#max_cache_time)
+        14. [ALLOW_QUERY](#allow_query)
+        15. [ALLOW_RECURSION](#allow_recursion)
 2. [Default mountpoints](#default-mountpoints)
 3. [Default ports](#default-ports)
 4. [Examples](#examples)
@@ -96,7 +97,8 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
 | `DNS_PTR`          | string |           | Comma separated list of PTR records (reverse DNS). |
 | `DNSSEC_VALIDATE`  | string | `no`      | Control the behaviour of DNSSEC validation. The default is to not validate: `no`. Other possible values are: `yes` and `auto`. |
 | `DNS_FORWARDER`    | string |           | Specify a comma separated list of IP addresses as custom DNS resolver. This is useful if your LAN already has a DNS server which adds custom/internal domains and you still want to keep them in this DNS server<br/>Example: `DNS_FORWARDER=8.8.8.8,8.8.4.4` |
-| `TTL_TIME`         | int    | `3600`    | (Time in seconds) See [BIND TTL](http://www.zytrax.com/books/dns/apa/ttl.html) and [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html)|
+| `MAX_CACHE_SIZE`   | size   | `90%`     | Amount of memory used by the server (cached results) |
+| `TTL_TIME`         | int    | `3600`    | (time in seconds) see [bind ttl](http://www.zytrax.com/books/dns/apa/ttl.html) and [bind soa](http://www.zytrax.com/books/dns/ch8/soa.html)|
 | `REFRESH_TIME`     | int    | `1200`    | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
 | `RETRY_TIME`       | int    | `180`     | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
 | `EXPIRY_TIME`      | int    | `1209600` | (Time in seconds) See [BIND SOA](http://www.zytrax.com/books/dns/ch8/soa.html) |
@@ -202,6 +204,12 @@ Some examples
 DNS_FORWARDER='8.8.8.8'
 DNS_FORWARDER='8.8.8.8,192.168.0.10'
 ```
+#### MAX_CACHE_SIZE
+The amount of RAM used by the server to store results. You can use relative (percent) or absolute (bytes) values.
+Examples:
+* `MAX_CACHE_SIZE=30%` (Use 30% of the systems memory)
+* `MAX_CACHE_SIZE=512M` (Use 512 Megabytes)
+* `MAX_CACHE_SIZE=2G` (Use 2 Gigabytes)
 
 #### TTL_TIME
 Specify time in seconds.
