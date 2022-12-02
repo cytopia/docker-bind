@@ -58,7 +58,7 @@ The following Docker image tags are built once and can be used for reproducible 
 
 **Table of Contents**
 
-1. [Environmental variables](#environmental-variables)
+1. [Environmental variables](#capital_abcd-environmental-variables)
     1. [Required environmental variables](#required-environmental-variables)
     2. [Optional environmental variables](#optional-environmental-variables)
         1. [DEBUG_ENTRYPOINT](#debug_entrypoint)
@@ -76,9 +76,9 @@ The following Docker image tags are built once and can be used for reproducible 
         13. [MAX_CACHE_TIME](#max_cache_time)
         14. [ALLOW_QUERY](#allow_query)
         15. [ALLOW_RECURSION](#allow_recursion)
-2. [Default mountpoints](#default-mountpoints)
-3. [Default ports](#default-ports)
-4. [Examples](#examples)
+2. [Default mountpoints](#open_file_folder-default-mount-points)
+3. [Default ports](#calling-default-ports)
+4. [Examples](#information_source-examples)
     1. [Default run](#default-run)
     2. [Wildcard domain](#wildcard-domain)
     3. [Wildcard subdomain](#wildcard-subdomain)
@@ -87,9 +87,10 @@ The following Docker image tags are built once and can be used for reproducible 
     6. [Wildcard TLD and DNS resolver](#wildcard-tld-and-dns-resolver)
     7. [Wildcard TLD, DNS resolver and extra hosts](#wildcard-tld-dns-resolver-and-extra-hosts)
     8. [Extra hosts, DNS resolver, allow query, and allow recursion](#extra-hosts-dns-resolver-allow-query-and-allow-recursion)
-5. [Host integration](#host-integration)
-6. [Support](#support)
-7. [License](#license)
+5. [Host integration](#wrench-host-integration)
+6. [Support](#coffee-support)
+7. [Articles](#page_with_curl-articles)
+8. [License](#page_facing_up-license)
 
 ---
 
