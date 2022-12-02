@@ -1,50 +1,59 @@
 # Bind Docker
 
 
+[![Tag](https://img.shields.io/github/tag/cytopia/docker-bind.svg)](https://github.com/cytopia/docker-bind/releases)
 [![lint](https://github.com/cytopia/docker-bind/workflows/lint/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Alint)
 [![build](https://github.com/cytopia/docker-bind/workflows/build/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Abuild)
 [![nightly](https://github.com/cytopia/docker-bind/workflows/nightly/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Anightly)
-
-[![Tag](https://img.shields.io/github/tag/cytopia/docker-bind.svg)](https://github.com/cytopia/docker-bind/releases)
 [![Gitter](https://badges.gitter.im/cytopia/Lobby.svg)](https://gitter.im/cytopia/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Discourse](https://img.shields.io/discourse/https/devilbox.discourse.group/status.svg?colorB=%234CB697)](https://devilbox.discourse.group)
-[![](https://images.microbadger.com/badges/version/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind")
-[![](https://images.microbadger.com/badges/image/cytopia/bind.svg)](https://microbadger.com/images/cytopia/bind "bind")
 [![License](https://img.shields.io/badge/license-MIT-%233DA639.svg)](https://opensource.org/licenses/MIT)
+
+Bind caching DNS server based on Alpine and Debian slim with support for DNS forwarders, infinite wild-card DNS, infinite extra hosts, reverse DNS, DNSSEC timing settings and others.
+
+[![](https://img.shields.io/docker/pulls/cytopia/bind.svg)](https://hub.docker.com/r/cytopia/bind)
+[![Docker](https://badgen.net/badge/icon/:latest?icon=docker&label=cytopia/bind)](https://hub.docker.com/r/cytopia/bind)
 
 **Available Architectures:**  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`, `ppc64le`, `s390x`, `mips64le`
 
-----
+| Upstream Project |
+|------------------|
+| <a title="Devilbox" href="https://github.com/cytopia/devilbox" ><img title="Devilbox" height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a> |
 
-Bind caching DNS server based on Debian slim with support for DNS forwarders, infinite wild-card DNS, infinite extra hosts, reverse DNS, DNSSEC timing settings and others.
+
+## :whale: Available Docker tags
+
+#### Rolling Releases
+
+The following Docker image tags are rolling releases and are built and updated every night.
+
+[![nightly](https://github.com/cytopia/docker-bind/workflows/nightly/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Anightly)
+
+| Debian stable | Alpine |
+|---------------|--------|
+| [`latest`](Dockerfiles/Dockerfile.latest) [`stable`](Dockerfiles/Dockerfile.stable)<br/>[`latest-<latest-git-tag>`](Dockerfiles/Dockerfile.latest) [`stable-<latest-git-tag>`](Dockerfiles/Dockerfile.stable) | [`alpine`](Dockerfiles/Dockerfile.alpine)<br/>[`alpine-<latest-git-tag>`](Dockerfiles/Dockerfile.alpine) |
+
+> :information_source: Where `<latest-git-tag>` refers to the latest git tag from this repository.<br/>
+> :information_source: Note: Only the latest git tag is build nightly, all others remain unchaned.
 
 
-| Docker Hub | Upstream Project |
-|------------|------------------|
-| <a href="https://hub.docker.com/r/cytopia/bind"><img height="82px" src="http://dockeri.co/image/cytopia/bind" /></a> | <a href="https://github.com/cytopia/devilbox" ><img height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a> |
+#### Point in time releases
 
-## Available Docker tags
+The following Docker image tags are built once and can be used for reproducible builds. Its version never changes so you will have to update tags in your pipelines from time to time in order to stay up-to-date.
 
-| Docker Tag                     | Description                                                  |
-|--------------------------------|--------------------------------------------------------------|
-| `latest`                       | Latest Debian stable image (default)                         |
-| `stable`                       | Latest Debian stable image                                   |
-| `alpine`                       | Latest Alpine image                                          |
-|                                |                                                              |
-| `[0-9]\.[0-9]+`                | Git tagged Debian stable image. E.g: `0.53`                  |
-| `stable-[0-9]\.[0-9]+`         | Git tagged Debian stable image. E.g: `stable-0.53`           |
-| `alpine-[0-9]\.[0-9]+`         | Git tagged Alpine image. E.g: `alpine-0.53`                  |
-|                                |                                                              |
-| `release-[0-9]\.[0-9]+`        | Git branch Debian stable image. E.g: `release-0.53`          |
-| `stable-release-[0-9]\.[0-9]+` | Git branch Debian stable image. E.g: `stable-release-0.53`   |
-| `alpine-release-[0-9]\.[0-9]+` | Git branch Alpine image. E.g: `alpine-release-0.53`          |
+[![build](https://github.com/cytopia/docker-bind/workflows/build/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Abuild)
 
+| Debian stable | Alpine |
+|---------------|--------|
+| [`latest-<git-tag>`](Dockerfiles/Dockerfile.latest) [`stable-<git-tag>`](Dockerfiles/Dockerfile.stable) | [`alpine-<git-tag>`](Dockerfiles/Dockerfile.alpine) |
+
+> :information_source: Where `<git-tag>` refers to the chosen git tag from this repository.<br/>
 
 ----
 
 **Table of Contents**
 
-1. [Environmental variables](#environmental-variables)
+1. [Environmental variables](#capital_abcd-environmental-variables)
     1. [Required environmental variables](#required-environmental-variables)
     2. [Optional environmental variables](#optional-environmental-variables)
         1. [DEBUG_ENTRYPOINT](#debug_entrypoint)
@@ -62,9 +71,9 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
         13. [MAX_CACHE_TIME](#max_cache_time)
         14. [ALLOW_QUERY](#allow_query)
         15. [ALLOW_RECURSION](#allow_recursion)
-2. [Default mountpoints](#default-mountpoints)
-3. [Default ports](#default-ports)
-4. [Examples](#examples)
+2. [Default mountpoints](#open_file_folder-default-mount-points)
+3. [Default ports](#calling-default-ports)
+4. [Examples](#information_source-examples)
     1. [Default run](#default-run)
     2. [Wildcard domain](#wildcard-domain)
     3. [Wildcard subdomain](#wildcard-subdomain)
@@ -73,13 +82,14 @@ Bind caching DNS server based on Debian slim with support for DNS forwarders, in
     6. [Wildcard TLD and DNS resolver](#wildcard-tld-and-dns-resolver)
     7. [Wildcard TLD, DNS resolver and extra hosts](#wildcard-tld-dns-resolver-and-extra-hosts)
     8. [Extra hosts, DNS resolver, allow query, and allow recursion](#extra-hosts-dns-resolver-allow-query-and-allow-recursion)
-5. [Host integration](#host-integration)
-6. [Support](#support)
-7. [License](#license)
+5. [Host integration](#wrench-host-integration)
+6. [Support](#coffee-support)
+7. [Articles](#page_with_curl-articles)
+8. [License](#page_facing_up-license)
 
 ---
 
-## Environmental variables
+## :capital_abcd: Environmental variables
 
 ### Required environmental variables
 
@@ -265,12 +275,12 @@ ALLOW_RECURSION='any'
 ALLOW_RECURSION='192.168.1.0/24,127.0.0.1'
 ```
 
-## Default mount points
+## :open_file_folder: Default mount points
 
 - None
 
 
-## Default ports
+## :calling: Default ports
 
 | Docker | Description  |
 |--------|--------------|
@@ -278,7 +288,7 @@ ALLOW_RECURSION='192.168.1.0/24,127.0.0.1'
 | 53/udp | DNS Resolver |
 
 
-## Examples
+## :information_source: Examples
 
 The following examples start the container in foreground and use `-i`, so you can easily stop
 it by pressing `<Ctrl> + c`. For a production run, you would rather use `-d` to send it to the
@@ -404,7 +414,7 @@ $ docker run -i \
     -t cytopia/bind
 ```
 
-## Host integration
+## :wrench: Host integration
 
 You can run this DNS container locally without having to worry to affect any corporate DNS server
 that are given to you via DHCP.
@@ -429,7 +439,7 @@ If `cytopia/bind` is not running, it does not affect the name resolution, becaus
 have entries in `/etc/resolv.conf`.
 
 
-## Support
+## :coffee: Support
 
 Get support here
 
@@ -461,8 +471,12 @@ Get support here
 </table>
 
 
+## :page_with_curl: Articles
 
-## License
+* [Serving Bind DNS in Kubernetes](https://medium.com/swlh/serving-bind-dns-in-kubernetes-8639fce37448)
+
+
+## :page_facing_up: License
 
 **[MIT License](LICENSE.md)**
 
