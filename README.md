@@ -1,27 +1,38 @@
 # Bind Docker
 
-
 [![Tag](https://img.shields.io/github/tag/cytopia/docker-bind.svg)](https://github.com/cytopia/docker-bind/releases)
 [![lint](https://github.com/cytopia/docker-bind/workflows/lint/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Alint)
 [![build](https://github.com/cytopia/docker-bind/workflows/build/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Abuild)
 [![nightly](https://github.com/cytopia/docker-bind/workflows/nightly/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Anightly)
-[![Gitter](https://badges.gitter.im/cytopia/Lobby.svg)](https://gitter.im/cytopia/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Discourse](https://img.shields.io/discourse/https/devilbox.discourse.group/status.svg?colorB=%234CB697)](https://devilbox.discourse.group)
 [![License](https://img.shields.io/badge/license-MIT-%233DA639.svg)](https://opensource.org/licenses/MIT)
 
-Bind caching DNS server based on Alpine and Debian slim with support for DNS forwarders, infinite wild-card DNS, infinite extra hosts, reverse DNS, DNSSEC timing settings and others.
-
-[![](https://img.shields.io/docker/pulls/cytopia/bind.svg)](https://hub.docker.com/r/cytopia/bind)
-[![Docker](https://badgen.net/badge/icon/:latest?icon=docker&label=cytopia/bind)](https://hub.docker.com/r/cytopia/bind)
+[![Discord](https://img.shields.io/discord/1051541389256704091?color=8c9eff&label=Discord&logo=discord)](https://discord.gg/2wP3V6kBj4)
+[![Discourse](https://img.shields.io/discourse/https/devilbox.discourse.group/status.svg?colorB=%234CB697&label=Discourse&logo=discourse)](https://devilbox.discourse.group)
 
 **Available Architectures:**  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`, `ppc64le`, `s390x`, `mips64le`
 
-| Upstream Project |
-|------------------|
-| <a title="Devilbox" href="https://github.com/cytopia/devilbox" ><img title="Devilbox" height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a> |
+[![](https://img.shields.io/docker/pulls/cytopia/bind.svg)](https://hub.docker.com/r/cytopia/bind)
+
+Bind caching DNS server based on Alpine and Debian slim with support for DNS forwarders, infinite wild-card DNS, infinite extra hosts, reverse DNS, DNSSEC timing settings and others.
+
+| Bind Project        | Reference Implementation |
+|:-------------------:|:------------------------:|
+| <a title="Docker Bind" href="https://github.com/cytopia/docker-bind" ><img height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/06/png/banner_256_trans.png" /></a> | <a title="Devilbox" href="https://github.com/cytopia/devilbox" ><img height="82px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a> |
+| [Bind DNS Server](https://github.com/cytopia/docker-bind) | The [Devilbox](https://github.com/cytopia/devilbox) |
 
 
-## :whale: Available Docker tags
+## 🐋 Available Docker tags
+
+[![](https://img.shields.io/docker/pulls/cytopia/bind.svg)](https://hub.docker.com/r/cytopia/bind)
+
+[`latest`][tag_latest] [`stable`][tag_stable] [`alpine`][tag_alpine]
+```bash
+docker pull cytopia/bind
+```
+
+[tag_latest]: Dockerfiles/Dockerfile.latest
+[tag_stable]: Dockerfiles/Dockerfile.stable
+[tag_alpine]: Dockerfiles/Dockerfile.alpine
 
 #### Rolling Releases
 
@@ -29,13 +40,11 @@ The following Docker image tags are rolling releases and are built and updated e
 
 [![nightly](https://github.com/cytopia/docker-bind/workflows/nightly/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Anightly)
 
-| Debian stable | Alpine |
-|---------------|--------|
-| [`latest`](Dockerfiles/Dockerfile.latest) [`stable`](Dockerfiles/Dockerfile.stable)<br/>[`latest-<latest-git-tag>`](Dockerfiles/Dockerfile.latest) [`stable-<latest-git-tag>`](Dockerfiles/Dockerfile.stable) | [`alpine`](Dockerfiles/Dockerfile.alpine)<br/>[`alpine-<latest-git-tag>`](Dockerfiles/Dockerfile.alpine) |
-
-> :information_source: Where `<latest-git-tag>` refers to the latest git tag from this repository.<br/>
-> :information_source: Note: Only the latest git tag is build nightly, all others remain unchaned.
-
+| Docker Tag                       | Git Ref      | Available Architectures                                                      |
+|----------------------------------|--------------|------------------------------------------------------------------------------|
+| **[`latest`][tag_latest]**       | master       | `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`, `ppc64le`, `s390x`, `mips64le` |
+| [`stable`][tag_stable]           | master       | `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`, `ppc64le`, `s390x`, `mips64le` |
+| [`alpine`][tag_alpine]           | master       | `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`, `ppc64le`, `s390x`, `mips64le` |
 
 #### Point in time releases
 
@@ -43,19 +52,23 @@ The following Docker image tags are built once and can be used for reproducible 
 
 [![build](https://github.com/cytopia/docker-bind/workflows/build/badge.svg)](https://github.com/cytopia/docker-bind/actions?query=workflow%3Abuild)
 
-| Debian stable | Alpine |
-|---------------|--------|
-| [`latest-<git-tag>`](Dockerfiles/Dockerfile.latest) [`stable-<git-tag>`](Dockerfiles/Dockerfile.stable) | [`alpine-<git-tag>`](Dockerfiles/Dockerfile.alpine) |
+| Docker Tag                       | Git Ref      | Available Architectures                                                       |
+|----------------------------------|--------------|-------------------------------------------------------------------------------|
+| **[`<tag>`][tag_latest]**        | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`, `ppc64le`, `s390x`, `mips64le` |
+| [`<tag>-stable`][tag_stable]     | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`, `ppc64le`, `s390x`, `mips64le` |
+| [`<tag>-alpine`][tag_alpine]     | git: `<tag>` |  `amd64`, `i386`, `arm64`, `arm/v7`, `arm/v6`, `ppc64le`, `s390x`, `mips64le` |
 
-> :information_source: Where `<git-tag>` refers to the chosen git tag from this repository.<br/>
+> 🛈 Where `<tag>` refers to the chosen git tag from this repository.<br/>
+> ⚠ **Warning:** The latest available git tag is also build every night and considered a rolling tag.
+
 
 ----
 
 **Table of Contents**
 
-1. [Environmental variables](#capital_abcd-environmental-variables)
-    1. [Required environmental variables](#required-environmental-variables)
-    2. [Optional environmental variables](#optional-environmental-variables)
+1. [Environment variables](#-environment-variables)
+    1. [Required environment variables](#required-environment-variables)
+    2. [Optional environment variables](#optional-environment-variables)
         1. [DEBUG_ENTRYPOINT](#debug_entrypoint)
         2. [DOCKER_LOGS](#docker_logs)
         3. [DNS_A](#dns_a)
@@ -71,9 +84,9 @@ The following Docker image tags are built once and can be used for reproducible 
         13. [MAX_CACHE_TIME](#max_cache_time)
         14. [ALLOW_QUERY](#allow_query)
         15. [ALLOW_RECURSION](#allow_recursion)
-2. [Default mountpoints](#open_file_folder-default-mount-points)
-3. [Default ports](#calling-default-ports)
-4. [Examples](#information_source-examples)
+2. [Volumes](#-volumes)
+3. [Exposed Ports](#-exposed-ports)
+4. [Examples](#-examples)
     1. [Default run](#default-run)
     2. [Wildcard domain](#wildcard-domain)
     3. [Wildcard subdomain](#wildcard-subdomain)
@@ -82,20 +95,23 @@ The following Docker image tags are built once and can be used for reproducible 
     6. [Wildcard TLD and DNS resolver](#wildcard-tld-and-dns-resolver)
     7. [Wildcard TLD, DNS resolver and extra hosts](#wildcard-tld-dns-resolver-and-extra-hosts)
     8. [Extra hosts, DNS resolver, allow query, and allow recursion](#extra-hosts-dns-resolver-allow-query-and-allow-recursion)
-5. [Host integration](#wrench-host-integration)
-6. [Support](#coffee-support)
-7. [Articles](#page_with_curl-articles)
-8. [License](#page_facing_up-license)
+5. [Host integration](#-host-integration)
+6. [Sister Projects](#-sister-projects)
+7. [Community](#-community)
+8. [Articles](#-articles)
+9. [Credits](#-credits)
+10. [Maintainer](#-maintainer)
+11. [License](#-license)
 
 ---
 
-## :capital_abcd: Environmental variables
+## ∑ Environment Variables
 
-### Required environmental variables
+### Required environment variables
 
 - None
 
-### Optional environmental variables
+### Optional environment variables
 
 | Variable           | Type   | Default   | Description |
 |--------------------|--------|-----------|-------------|
@@ -275,12 +291,12 @@ ALLOW_RECURSION='any'
 ALLOW_RECURSION='192.168.1.0/24,127.0.0.1'
 ```
 
-## :open_file_folder: Default mount points
+## 📂 Volumes
 
 - None
 
 
-## :calling: Default ports
+## 🖧 Exposed Ports
 
 | Docker | Description  |
 |--------|--------------|
@@ -288,7 +304,7 @@ ALLOW_RECURSION='192.168.1.0/24,127.0.0.1'
 | 53/udp | DNS Resolver |
 
 
-## :information_source: Examples
+## 💡 Examples
 
 The following examples start the container in foreground and use `-i`, so you can easily stop
 it by pressing `<Ctrl> + c`. For a production run, you would rather use `-d` to send it to the
@@ -298,7 +314,7 @@ background.
 
 Exposing the port is mandatory if you want to use it for your host operating system.
 ```bash
-$ docker run -i \
+docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
     -t cytopia/bind
@@ -309,7 +325,7 @@ $ docker run -i \
 Let's add a wildcard zone for `*.example.com`. All subdomains (but not example.com itself) will resolve
 to `192.168.0.1`.
 ```bash
-$ docker run -i \
+docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
     -e DNS_A='*.example.com=192.168.0.1' \
@@ -321,7 +337,7 @@ $ docker run -i \
 Let's add a wildcard zone for `*.aws.example.com`. All subdomains (but not aws.example.com itself) will resolve
 to `192.168.0.1`.
 ```bash
-$ docker run -i \
+docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
     -e DNS_A='*.aws.example.com=192.168.0.1' \
@@ -333,7 +349,7 @@ $ docker run -i \
 Let's add a wildcard zone for `*.loc`. All domains, subdomain (but not loc itself) will resolve
 to `192.168.0.4`.
 ```bash
-$ docker run -i \
+docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
     -e DNS_A='*.loc=192.168.0.4' \
@@ -345,7 +361,7 @@ $ docker run -i \
 Let's add a wildcard zone for `*.loc`, and an A record for loc. All domains, subdomain and loc itself will resolve
 to `192.168.0.4`. Additionally we specify that `host.loc` will be the reverse loopup for `192.168.0.4`.
 ```bash
-$ docker run -i \
+docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
     -e DNS_A='*.loc=192.168.0.4, loc=192.168.0.4' \
@@ -365,7 +381,7 @@ any already defined custom DNS entries by that nameserver.
 * Your corporate DNS servers are `10.0.15.1` and `10.0.15.2`
 
 ```bash
-$ docker run -i \
+docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
     -e DNS_A='*.loc=192.168.0.1' \
@@ -382,7 +398,7 @@ $ docker run -i \
     - host5.org -> 192.168.0.3
 
 ```bash
-$ docker run -i \
+docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
     -e DNS_A='*.loc=192.168.0.1, host5.loc=192.168.0.2, host5.org=192.168.0.3' \
@@ -404,7 +420,7 @@ $ docker run -i \
     - host1 -> 192.168.0.11
 
 ```bash
-$ docker run -i \
+docker run -i \
     -p 53:53/tcp \
     -p 53:53/udp \
     -e DNS_A='host1=192.168.0.11' \
@@ -414,7 +430,7 @@ $ docker run -i \
     -t cytopia/bind
 ```
 
-## :wrench: Host integration
+## 🔧 Host integration
 
 You can run this DNS container locally without having to worry to affect any corporate DNS server
 that are given to you via DHCP.
@@ -426,10 +442,10 @@ prepend domain-name-servers 127.0.0.1;
 Restart network manager
 ```bash
 # Via service command
-$ sudo service network-manager restart
+sudo service network-manager restart
 
 # Or the systemd way
-$ sudo systemctl restart network-manager
+sudo systemctl restart network-manager
 ```
 
 This will make sure that whenever your `/etc/resolv.conf` is deployed, you will have `127.0.0.1`
@@ -439,44 +455,135 @@ If `cytopia/bind` is not running, it does not affect the name resolution, becaus
 have entries in `/etc/resolv.conf`.
 
 
-## :coffee: Support
+## 🖤 Sister Projects
 
-Get support here
+Show some love for the following sister projects.
+
+<table>
+ <tr>
+  <th>🖤 Project</th>
+  <th>🐱 GitHub</th>
+  <th>🐋 DockerHub</th>
+ </tr>
+ <tr>
+  <td><a title="Devilbox" href="https://github.com/cytopia/devilbox" ><img width="256px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/01/png/banner_256_trans.png" /></a></td>
+  <td><a href="https://github.com/cytopia/devilbox"><code>Devilbox</code></a></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td><a title="Docker PHP-FMP" href="https://github.com/devilbox/docker-php-fpm" ><img width="256px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/02/png/banner_256_trans.png" /></a></td>
+  <td><a href="https://github.com/devilbox/docker-php-fpm"><code>docker-php-fpm</code></a></td>
+  <td><a href="https://hub.docker.com/r/devilbox/php-fpm"><code>devilbox/php-fpm</code></a></td>
+ </tr>
+ <tr>
+  <td><a title="Docker PHP-FMP-Community" href="https://github.com/devilbox/docker-php-fpm-community" ><img width="256px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/03/png/banner_256_trans.png" /></a></td>
+  <td><a href="https://github.com/devilbox/docker-php-fpm-community"><code>docker-php-fpm-community</code></a></td>
+  <td><a href="https://hub.docker.com/r/devilbox/php-fpm-community"><code>devilbox/php-fpm-community</code></a></td>
+ </tr>
+ <tr>
+  <td><a title="Docker MySQL" href="https://github.com/devilbox/docker-mysql" ><img width="256px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/04/png/banner_256_trans.png" /></a></td>
+  <td><a href="https://github.com/devilbox/docker-mysql"><code>docker-mysql</code></a></td>
+  <td><a href="https://hub.docker.com/r/devilbox/mysql"><code>devilbox/mysql</code></a></td>
+ </tr>
+ <tr>
+  <td><img width="256px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/05/png/banner_256_trans.png" /></td>
+  <td>
+   <a href="https://github.com/devilbox/docker-apache-2.2"><code>docker-apache-2.2</code></a><br/>
+   <a href="https://github.com/devilbox/docker-apache-2.4"><code>docker-apache-2.4</code></a><br/>
+   <a href="https://github.com/devilbox/docker-nginx-stable"><code>docker-nginx-stable</code></a><br/>
+   <a href="https://github.com/devilbox/docker-nginx-mainline"><code>docker-nginx-mainline</code></a>
+  </td>
+  <td>
+   <a href="https://hub.docker.com/r/devilbox/apache-2.2"><code>devilbox/apache-2.2</code></a><br/>
+   <a href="https://hub.docker.com/r/devilbox/apache-2.4"><code>devilbox/apache-2.4</code></a><br/>
+   <a href="https://hub.docker.com/r/devilbox/nginx-stable"><code>devilbox/nginx-stable</code></a><br/>
+   <a href="https://hub.docker.com/r/devilbox/nginx-mainline"><code>devilbox/nginx-mainline</code></a>
+  </td>
+ <tr>
+  <td><a title="Bind DNS Server" href="https://github.com/cytopia/docker-bind" ><img width="256px" src="https://raw.githubusercontent.com/devilbox/artwork/master/submissions_banner/cytopia/06/png/banner_256_trans.png" /></a></td>
+  <td><a href="https://github.com/cytopia/docker-bind"><code>docker-bind</code></a></td>
+  <td><a href="https://hub.docker.com/r/cytopia/bind"><code>cytopia/bind</code></a></td>
+ </tr>
+ </tr>
+</table>
+
+
+## 👫 Community
+
+In case you seek help, go and visit the community pages.
 
 <table width="100%" style="width:100%; display:table;">
  <thead>
   <tr>
-   <th width="25%" style="width:25%;"><h3><a target="_blank" href="https://gitter.im/devilbox/Lobby">Chat</a></h3></th>
-   <th width="25%" style="width:25%;"><h3><a target="_blank" href="https://devilbox.discourse.group">Forum</a></h3></th>
+   <th width="33%" style="width:33%;"><h3><a target="_blank" href="https://devilbox.readthedocs.io">📘 Documentation</a></h3></th>
+   <th width="33%" style="width:33%;"><h3><a target="_blank" href="https://discord.gg/2wP3V6kBj4">🎮 Discord</a></h3></th>
+   <th width="33%" style="width:33%;"><h3><a target="_blank" href="https://devilbox.discourse.group">🗪 Forum</a></h3></th>
   </tr>
  </thead>
  <tbody style="vertical-align: middle; text-align: center;">
   <tr>
    <td>
-    <a target="_blank" href="https://gitter.im/devilbox/Lobby">
-     <img title="Chat on Gitter" width="100" style="width:100px;" name="Chat on Gitter" src="https://raw.githubusercontent.com/cytopia/icons/master/400x400/gitter.png" />
+    <a target="_blank" href="https://devilbox.readthedocs.io">
+     <img title="Documentation" name="Documentation" src="https://raw.githubusercontent.com/cytopia/icons/master/400x400/readthedocs.png" />
+    </a>
+   </td>
+   <td>
+    <a target="_blank" href="https://discord.gg/2wP3V6kBj4">
+     <img title="Chat on Discord" name="Chat on Discord" src="https://raw.githubusercontent.com/cytopia/icons/master/400x400/discord.png" />
     </a>
    </td>
    <td>
     <a target="_blank" href="https://devilbox.discourse.group">
-     <img title="Devilbox Forums" width="100" style="width:100px;" name="Forum" src="https://raw.githubusercontent.com/cytopia/icons/master/400x400/discourse.png" />
+     <img title="Devilbox Forums" name="Forum" src="https://raw.githubusercontent.com/cytopia/icons/master/400x400/discourse.png" />
     </a>
    </td>
   </tr>
   <tr>
-  <td><a target="_blank" href="https://gitter.im/devilbox/Lobby">gitter.im/devilbox</a></td>
+  <td><a target="_blank" href="https://devilbox.readthedocs.io">devilbox.readthedocs.io</a></td>
+  <td><a target="_blank" href="https://discord.gg/2wP3V6kBj4">discord/devilbox</a></td>
   <td><a target="_blank" href="https://devilbox.discourse.group">devilbox.discourse.group</a></td>
   </tr>
  </tbody>
 </table>
 
 
-## :page_with_curl: Articles
+## 📜 Articles
 
 * [Serving Bind DNS in Kubernetes](https://medium.com/swlh/serving-bind-dns-in-kubernetes-8639fce37448)
 
 
-## :page_facing_up: License
+## ❤️ Credits
+
+Thanks for contributing 🖤
+
+- **[@atomicbaum1](https://github.com/atomicbaum1)**
+- **[@ericp-mrel](https://github.com/ericp-mrel)**
+- **[@Zighy](https://github.com/Zighy)**
+
+
+## 🧘 Maintainer
+
+**[@cytopia](https://github.com/cytopia)**
+
+I try to keep up with literally **over 100 projects** besides a full-time job.
+If my work is making your life easier, consider contributing. 🖤
+
+* [GitHub Sponsorship](https://github.com/sponsors/cytopia)
+* [Patreon](https://www.patreon.com/devilbox)
+* [Open Collective](https://opencollective.com/devilbox)
+
+**Findme:**
+**🐱** [cytopia](https://github.com/cytopia) / [devilbox](https://github.com/devilbox) |
+**🐋** [cytopia](https://hub.docker.com/r/cytopia/) / [devilbox](https://hub.docker.com/r/devilbox/) |
+**🐦** [everythingcli](https://twitter.com/everythingcli) / [devilbox](https://twitter.com/devilbox) |
+**📖** [everythingcli.org](http://www.everythingcli.org/)
+
+**Contrib:** PyPI: [cytopia](https://pypi.org/user/cytopia/) **·**
+Terraform: [cytopia](https://registry.terraform.io/namespaces/cytopia) **·**
+Ansible: [cytopia](https://galaxy.ansible.com/cytopia)
+
+
+## 🗎 License
 
 **[MIT License](LICENSE.md)**
 
