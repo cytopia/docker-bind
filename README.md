@@ -66,7 +66,7 @@ The following Docker image tags are built once and can be used for reproducible 
 
 **Table of Contents**
 
-1. [Environment variables](#-environmental-variables)
+1. [Environment variables](#-environment-variables)
     1. [Required environment variables](#required-environment-variables)
     2. [Optional environment variables](#optional-environment-variables)
         1. [DEBUG_ENTRYPOINT](#debug_entrypoint)
